@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import Aurora from './components/Aurora/Aurora';
 import ChatMessage from './components/chat/ChatMessage';
 import TypingIndicator from './components/chat/TypingIndicator';

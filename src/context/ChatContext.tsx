@@ -4,6 +4,7 @@ import type { Message, ChatState } from '../types/chat';
 interface ChatContextType extends ChatState {
   sendMessage: (content: string) => Promise<void>;
   clearChat: () => void;
+  formatBotMessage: (text: string) => Promise<string>;
 }
 
 const ChatContext = createContext<ChatContextType | null>(null);
@@ -133,7 +134,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <ChatContext.Provider value={{ ...state, sendMessage, clearChat }}>
+    <ChatContext.Provider value={{ ...state, sendMessage, clearChat, formatBotMessage }}>
       {children}
     </ChatContext.Provider>
   );
