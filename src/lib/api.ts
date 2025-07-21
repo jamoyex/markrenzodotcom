@@ -2,7 +2,7 @@
 // Note: In production, these would call your backend API endpoints
 // For now, we'll fetch directly since this is a personal portfolio
 
-let dbPool: any = null;
+
 
 // For now, use a hybrid approach - try database if available, fallback to hardcoded data
 export async function getPortfolioItem(identifier: string) {
