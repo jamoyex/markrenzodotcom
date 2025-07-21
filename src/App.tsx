@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import Aurora from './components/Aurora/Aurora';
 import ChatContainer from './components/chat/ChatContainer';
 import { ChatProvider, useChat } from './context/ChatContext';
@@ -182,12 +182,24 @@ function ChatInterface() {
 }
 
 export default function App() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <ChatProvider>
       <Aurora 
         colorStops={["#3A29FF", "#FF94B4", "#FF3232"]}
-        blend={0.5}
-        amplitude={1.0}
+        blend={isMobile ? 1.2 : 0.5}
+        amplitude={isMobile ? 3.0 : 1.0}
         speed={0.5}
       />
       <ChatInterface />

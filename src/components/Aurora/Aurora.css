@@ -11,3 +11,12 @@
   z-index: 0;
   pointer-events: none;
 }
+
+/* Mobile optimization for aurora visibility */
+@media (max-width: 768px) {
+  .aurora-container {
+    /* Ensure full coverage on mobile */
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  }
+}

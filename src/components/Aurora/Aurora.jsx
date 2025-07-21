@@ -104,7 +104,8 @@ void main() {
   height = (uv.y * 2.0 - height + 0.2);
   float intensity = 0.6 * height;
   
-  float midPoint = 0.20;
+  // Make aurora more visible on smaller screens by adjusting midpoint based on amplitude
+  float midPoint = uAmplitude > 2.0 ? 0.35 : 0.20;
   float auroraAlpha = smoothstep(midPoint - uBlend * 0.5, midPoint + uBlend * 0.5, intensity);
   
   vec3 auroraColor = intensity * rampColor;
