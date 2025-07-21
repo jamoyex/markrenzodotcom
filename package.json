@@ -5,15 +5,23 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc -b && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "db:setup": "npx tsx scripts/setup-database.ts",
+    "db:test": "npx tsx -e \"import('./src/lib/database.js').then(db => db.testConnection().then(() => process.exit(0)))\"",
+    "db:create": "node scripts/create-tables.js",
+    "db:seed": "node scripts/insert-sample-data.js",
+    "db:reset": "npm run db:create && npm run db:seed"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-slot": "^1.0.2",
+    "@types/pg": "^8.15.4",
+    "dotenv": "^17.2.0",
     "framer-motion": "^11.0.3",
     "ogl": "^1.0.11",
+    "pg": "^8.16.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -31,6 +39,7 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "postcss": "^8.4.33",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.20.3",
     "typescript": "^5.2.2",
     "vite": "^5.0.8"
   }

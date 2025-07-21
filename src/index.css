@@ -913,3 +913,87 @@ body {
     transform: scale(1);
   }
 } 
+
+/* Improved Bot Message Styling */
+.bot-paragraph {
+  max-width: 100%;
+  word-wrap: break-word;
+  hyphens: none;
+}
+
+.message.assistant {
+  max-width: 90%;
+}
+
+.message.assistant .bot-paragraph {
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.95);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Better spacing for bot message content */
+.message.assistant > div {
+  padding: 0;
+  max-width: none;
+}
+
+/* Mobile improvements for bot messages */
+@media (max-width: 768px) {
+  .message.assistant {
+    max-width: 95%;
+  }
+  
+  .message.assistant .bot-paragraph {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+} 
+
+/* Horizontal Card Scroller */
+.horizontal-card-scroller {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
+}
+
+.horizontal-card-scroller::-webkit-scrollbar {
+  height: 6px;
+}
+
+.horizontal-card-scroller::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.horizontal-card-scroller::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.horizontal-card-scroller::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Smooth scroll snap for cards */
+.horizontal-card-scroller > div {
+  scroll-snap-align: start;
+}
+
+.horizontal-card-scroller {
+  scroll-snap-type: x proximity;
+}
+
+/* Hide scrollbar on mobile for cleaner look */
+@media (max-width: 768px) {
+  .horizontal-card-scroller::-webkit-scrollbar {
+    height: 3px;
+  }
+  
+  .horizontal-card-scroller {
+    scrollbar-width: none;
+  }
+} 

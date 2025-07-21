@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useRef } from 'react';
 import type { Message, ChatState } from '../types/chat';
 
 interface ChatContextType extends ChatState {
@@ -40,12 +40,19 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
 
 const WEBHOOK_URL = 'https://api.hellomarky.com/webhook/jamoyex';
 
+// Function to generate a session ID
+function generateSessionId(): string {
+  return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
+
 // Function to load component content
-async function loadComponent(componentName: string) {
+async function loadComponent(componentName: string): Promise<string | null> {
   try {
-    const response = await fetch(`/pages/${componentName}.php`);
-    if (!response.ok) throw new Error('Failed to load component');
-    return await response.text();
+    // For now, return basic info about the user as a string
+    if (componentName === 'aboutme' || componentName === 'about') {
+      return `<aboutmecard>Mark Renzo Mariveles - Full-Stack Developer & AI Specialist. Passionate about creating innovative digital solutions and helping businesses leverage AI technology.</aboutmecard>`;
+    }
+    return null;
   } catch (error) {
     console.error('Error loading component:', error);
     return null;
@@ -76,10 +83,13 @@ async function formatBotMessage(text: string) {
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(chatReducer, initialState);
+  
+  // Create a persistent session ID that only changes when chat is cleared
+  const sessionIdRef = useRef<string>(generateSessionId());
 
   const sendMessage = useCallback(async (content: string) => {
-    // Create session ID
-    const sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    // Use the persistent session ID
+    const sessionId = sessionIdRef.current;
 
     // Add user message
     const userMessage: Message = {
@@ -131,6 +141,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const clearChat = useCallback(() => {
     dispatch({ type: 'CLEAR_CHAT' });
+    // Generate a new session ID when chat is cleared
+    sessionIdRef.current = generateSessionId();
   }, []);
 
   return (
