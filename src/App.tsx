@@ -3,11 +3,10 @@ import Aurora from './components/Aurora/Aurora';
 import ChatContainer from './components/chat/ChatContainer';
 import { ChatProvider, useChat } from './context/ChatContext';
 import BlurText from './components/ui/BlurText';
-import ShinyText from './components/ui/ShinyText';
 import { heroImage } from '@/assets';
 
 function ChatInterface() {
-  const { messages, isTyping, sendMessage, clearChat } = useChat();
+  const { messages, isTyping, sendMessage } = useChat();
   const [inputValue, setInputValue] = useState('');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showChat, setShowChat] = useState(false);
