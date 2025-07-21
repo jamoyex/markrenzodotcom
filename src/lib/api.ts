@@ -4,21 +4,6 @@
 
 let dbPool: any = null;
 
-async function initDatabase() {
-  if (typeof window !== 'undefined') {
-    // We're in the browser - can't use direct database connections
-    // In production, you'd make HTTP requests to your backend API
-    throw new Error('Database connections not available in browser. Use API endpoints instead.');
-  }
-  
-  if (!dbPool) {
-    // Import database only on server-side (Node.js)
-    const { pool } = await import('./database.js');
-    dbPool = pool;
-  }
-  return dbPool;
-}
-
 // For now, use a hybrid approach - try database if available, fallback to hardcoded data
 export async function getPortfolioItem(identifier: string) {
   try {

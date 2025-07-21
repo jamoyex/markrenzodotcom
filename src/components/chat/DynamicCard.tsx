@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import WorkExperienceCard from './WorkExperienceCard';
 import ProjectCard from './ProjectCard';
 import SkillCard from './SkillCard';

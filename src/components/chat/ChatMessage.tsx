@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import type { Message } from '../../types/chat';
 import DynamicCard from './DynamicCard';
