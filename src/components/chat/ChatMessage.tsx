@@ -1,6 +1,8 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import type { Message } from '../../types/chat';
 import AboutCard from './AboutCard';
+import FadeUpText from '../ui/FadeUpText';
 
 interface ChatMessageProps {
   message: Message;
@@ -14,11 +16,22 @@ const formatMessage = (text: string) => {
   return formatted;
 };
 
-const renderMessageContent = (content: string) => {
+const renderMessageContent = (content: string, isUser: boolean) => {
   const parts = content.split(/<aboutmecard>/);
   return parts.map((part, index) => (
     <React.Fragment key={index}>
-      {part && <div dangerouslySetInnerHTML={{ __html: formatMessage(part) }} />}
+      {part && (
+        <div>
+          {isUser ? (
+            <div dangerouslySetInnerHTML={{ __html: formatMessage(part) }} />
+          ) : (
+            <FadeUpText
+              text={part.replace(/\*\*(.*?)\*\*/g, '$1')} // Remove markdown for now
+              delay={index * 0.2}
+            />
+          )}
+        </div>
+      )}
       {index < parts.length - 1 && <AboutCard />}
     </React.Fragment>
   ));
@@ -38,17 +51,24 @@ export default function ChatMessage({ message }: ChatMessageProps) {
   };
 
   return (
-    <div
+    <motion.div
       className={`message ${isUser ? 'user' : 'assistant'}`}
       style={{
         display: 'flex',
         padding: '20px 0',
         justifyContent: isUser ? 'flex-end' : 'flex-start'
       }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ 
+        duration: 0.4, 
+        ease: 'easeOut',
+        delay: isUser ? 0 : 0.2
+      }}
     >
       <div style={messageStyle}>
-        {renderMessageContent(content)}
+        {renderMessageContent(content, isUser)}
       </div>
-    </div>
+    </motion.div>
   );
 } 

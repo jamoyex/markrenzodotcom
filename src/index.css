@@ -47,7 +47,7 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: var(--space-4) var(--space-6);
-  z-index: 10;
+  z-index: 100;
   background: transparent;
 }
 
@@ -77,11 +77,13 @@ body {
   align-items: center;
   padding: var(--space-2) var(--space-4);
   background-color: var(--color-surface);
+  border: none;
   border-radius: 9999px;
   color: var(--color-text-primary);
   text-decoration: none;
   font-size: 0.875rem;
   font-weight: 500;
+  cursor: pointer;
   transition: background-color 0.2s;
 }
 
@@ -94,7 +96,36 @@ body {
   display: flex;
   flex-direction: column;
   position: relative;
-  z-index: 1;
+  z-index: 10;
+  pointer-events: none;
+}
+
+#app-container #input-container {
+  pointer-events: all;
+  opacity: 1;
+}
+
+
+
+/* Hero transition animations */
+#hero-state {
+  opacity: 1;
+  transition: opacity 0.8s ease-out;
+}
+
+#hero-state.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#hero-state.hidden {
+  display: none;
+}
+
+/* Chat fade-in animation */
+#app-container.fade-in #chat-container {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 #chat-container {
@@ -102,26 +133,344 @@ body {
   margin: 0 auto;
   width: 100%;
   max-width: 48rem;
-  padding: 5rem 0;
+  padding: 2rem 0;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
 
+/* Mobile chat container padding to clear header */
+@media (max-width: 1024px) {
+  #chat-container {
+    padding-top: 5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #chat-container {
+    padding-top: 4rem;
+  }
+}
+
+/* Hero Image and Content Styles */
 #hero-state {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
 }
 
-#hero-state h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  margin: 0;
-  background: linear-gradient(to right, var(--color-text-primary), var(--color-text-secondary));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+.hero-container {
+  width: 75vw;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-left: -10vw;
+}
+
+.hero-image-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.hero-image {
+  height: 85vh; /* Always same visual height */
+  width: 85vh; /* Square crop on mobile - 1000x1000 equivalent */
+  object-fit: cover;
+  object-position: top;
+  animation: blurFadeIn 0.8s ease-out 0.1s both;
+}
+
+
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  text-align: right;
+  margin-left: auto;
+  padding-left: 2rem;
+  margin-top: -20vh;
+}
+
+/* Responsive text sizing for hero content */
+
+/* Mobile - smaller text */
+.hero-content .text-5xl {
+  font-size: 3rem; /* 48px */
+}
+
+.hero-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.125rem; /* 18px */
+  font-weight: 300;
+  margin: 0.75rem 0;
+  text-align: right;
+}
+
+/* Hero text alignment classes */
+.hero-greeting,
+.hero-main-title {
+  text-align: right;
+}
+
+.hero-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.4;
+  margin: 0rem 0 1.5rem 0;
+  margin-left: auto;
+  max-width: 65%;
+  text-align: right;
+}
+
+/* MacBook/Laptop screens */
+@media (min-width: 768px) and (max-width: 1439px) {
+  .hero-image {
+    width: 70vh; /* Slightly wider - shows more of 1000x1200 */
+  }
+  
+  .hero-content .text-5xl {
+    font-size: 4.5rem; /* 72px */
+  }
+  
+  .hero-subtitle {
+    font-size: 1.375rem; /* 22px */
+  }
+  
+  .hero-description {
+    font-size: 1rem; /* 16px */
+  }
+}
+
+/* Large monitors */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .hero-image {
+    width: 60vh; /* Even wider - shows more of 1000x1400 */
+  }
+  
+  .hero-content .text-5xl {
+    font-size: 5rem; /* 80px */
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  .hero-description {
+    font-size: 1.125rem; /* 18px */
+  }
+}
+
+/* 4K monitors - largest text */
+@media (min-width: 1920px) {
+  .hero-image {
+    width: 57vh; /* Full aspect ratio - shows complete 1000x1500 */
+  }
+  
+  .hero-content .text-5xl {
+    font-size: 6rem; /* 96px */
+  }
+  
+  .hero-subtitle {
+    font-size: 1.75rem; /* 28px */
+  }
+  
+  .hero-description {
+    font-size: 1.25rem; /* 20px */
+  }
+}
+
+.social-icons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 0;
+  animation: fadeUp 0.6s ease-out 2.0s both;
+}
+
+.social-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.social-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Mobile and Tablet Responsive Design */
+@media (max-width: 1024px) {
+  .hero-container {
+    width: 100%;
+    height: 100vh;
+    flex-direction: column;
+    margin-left: 0;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .hero-image-container {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    height: 48vh;
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    order: 2;
+    padding-top: 0;
+  }
+  
+  .hero-image {
+    height: 48vh;
+    width: 48vh;
+    max-width: 90vw;
+    max-height: 90vw;
+    object-fit: cover;
+    object-position: center top;
+  }
+  
+  .hero-content {
+    height: 52vh;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    padding: 2rem;
+    padding-top: 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    order: 1;
+    margin-top: 0;
+  }
+  
+  .hero-content .text-5xl {
+    font-size: 2.5rem; /* 40px */
+  }
+  
+  .hero-content .text-2xl {
+    font-size: 1.5rem;
+  }
+  
+  .hero-greeting,
+  .hero-main-title {
+    text-align: center;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem; /* 16px */
+    text-align: center;
+    margin: 0.5rem 0;
+  }
+  
+  .hero-description {
+    max-width: 95%;
+    text-align: center;
+    margin: 0 auto 1rem;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.3;
+  }
+  
+  .social-icons {
+    justify-content: center;
+    margin-top: 0;
+    gap: 0.75rem;
+  }
+  
+  .social-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .social-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Extra small mobile adjustments */
+@media (max-width: 480px) {
+  .hero-content {
+    height: 52vh;
+    padding: 1rem;
+    padding-top: 4rem;
+  }
+  
+  .hero-image-container {
+    height: 48vh;
+  }
+  
+  .hero-content .text-5xl {
+    font-size: 2rem; /* 32px */
+  }
+  
+  .hero-content .text-2xl {
+    font-size: 1.25rem;
+  }
+  
+  .hero-greeting,
+  .hero-main-title {
+    text-align: center;
+  }
+  
+  .hero-image {
+    height: 44vh;
+    width: 44vh;
+  }
+  
+  .hero-description {
+    font-size: 0.875rem;
+    text-align: center;
+    line-height: 1.3;
+    max-width: 95%;
+    margin: 0 auto 1rem;
+  }
+  
+  .hero-subtitle {
+    text-align: center;
+  }
+  
+  .social-icons {
+    margin-top: 0;
+    gap: 0.5rem;
+  }
+  
+  .social-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .social-icon svg {
+    width: 14px;
+    height: 14px;
+  }
 }
 
 #chat-content {
@@ -136,12 +485,10 @@ body {
   display: none;
 }
 
-.conversation-started #chat-container {
-  padding-bottom: 11rem;
-}
+
 
 .conversation-started #input-container {
-  background: linear-gradient(to top, var(--color-background) 50%, transparent);
+  background: linear-gradient(to top, var(--color-background) 60%, rgba(10, 10, 10, 0.8) 80%, transparent);
 }
 
 #input-container {
@@ -149,7 +496,8 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: var(--space-6) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  padding-top: 2rem; /* Space above for scroll button */
   background: transparent;
   z-index: 10;
   width: 100%;
@@ -238,12 +586,12 @@ body {
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 3px;
   background: rgba(64, 65, 79, 0.3);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius-soft);
-  padding: 14px 20px;
+  padding: 8px 14px;
 }
 
 .input-main {
@@ -254,18 +602,30 @@ body {
 
 .input-actions {
   display: flex;
-  gap: var(--space-2);
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 2px 0;
+  margin-top: 0;
+  white-space: nowrap;
+}
+
+.input-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .input-action-btn {
   background: rgba(64, 65, 79, 0.9);
   border: none;
-  padding: var(--space-2) var(--space-3);
+  padding: 6px 12px;
   color: var(--color-text-secondary);
   cursor: pointer;
   border-radius: 9999px;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   transition: all 0.2s;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .input-action-btn:hover {
@@ -275,12 +635,12 @@ body {
 
 .input-wrapper input {
   flex: 1;
-  padding: var(--space-2) var(--space-3);
+  padding: 8px 12px;
   background: none;
   border: none;
   color: var(--color-text-primary);
   outline: none;
-  font-size: 1rem;
+  font-size: 0.875rem;
 }
 
 .input-wrapper button[type="submit"] {
@@ -316,12 +676,56 @@ body {
   background-color: rgba(63, 63, 63, 0.5);
 }
 
+.scroll-to-bottom-btn {
+  position: fixed;
+  bottom: 10rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  background-color: rgba(47, 47, 47, 0.9);
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 15;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-to-bottom-btn:hover {
+  background-color: rgba(63, 63, 63, 0.9);
+  transform: scale(1.05);
+}
+
 .copyright {
   text-align: center;
   font-size: 0.75rem;
   color: var(--color-text-secondary);
   padding-top: var(--space-4);
   margin: 0;
+}
+
+/* Hide copyright on mobile */
+@media (max-width: 768px) {
+  .copyright {
+    display: none;
+  }
+  
+  .input-action-btn {
+    font-size: 0.85rem;
+    padding: 5px 11px;
+  }
+  
+  .input-wrapper input {
+    font-size: 16px;
+    padding: 6px 10px;
+  }
 }
 
 .prose {
@@ -380,28 +784,24 @@ body {
   @apply border-l-4 border-surface pl-4 italic;
 }
 
-.chat-input-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 24px 16px;
-}
 
-.chat-input {
-  background: transparent;
-  border: none;
-  color: var(--color-text-primary);
-  width: 100%;
-  outline: none;
-}
 
 .chat-container {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow-y: auto;
-  padding-bottom: 180px; /* Space for input container */
+  padding: 0 var(--space-4);
   scroll-behavior: smooth;
+}
+
+.conversation-started .chat-container {
+  padding-bottom: 8rem; /* Bottom padding for input area spacing */
+}
+
+.dynamic-spacer {
+  width: 100%;
+  transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Uncomment for debugging: background: rgba(255, 0, 0, 0.1); */
 }
 
 .message {
@@ -481,4 +881,35 @@ body {
   margin: 0;
   color: var(--color-text-secondary);
   line-height: 1.5;
+} 
+
+/* Fade Up Animation */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* Blur Fade In Animation for Hero Image */
+@keyframes blurFadeIn {
+  0% {
+    filter: blur(10px);
+    opacity: 0;
+    transform: scale(1.1);
+  }
+  100% {
+    filter: blur(0px);
+    opacity: 1;
+    transform: scale(1);
+  }
 } 
