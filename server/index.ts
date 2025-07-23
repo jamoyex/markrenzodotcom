@@ -17,6 +17,11 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Serve static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(join(__dirname, '../dist')));
+}
+
 // Import database functions
 import { getPortfolioItemFromDatabase, getAllIdentifiersFromDatabase } from '../src/lib/api-server.js';
 
@@ -64,6 +69,13 @@ app.get('/api/identifiers', async (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'API server is running' });
 });
+
+// Serve React app for all non-API routes (production only)
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(join(__dirname, '../dist/index.html'));
+  });
+}
 
 app.listen(port, () => {
   console.log(`🚀 API Server running on http://localhost:${port}`);

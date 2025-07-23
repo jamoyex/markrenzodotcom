@@ -1,6 +1,6 @@
 // DEPRECATED: Portfolio data is now preloaded via PortfolioDataContext
 // API functions that make HTTP requests to Express server
-const API_BASE_URL = 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
 
 export async function getPortfolioItem(identifier: string) {
   try {
