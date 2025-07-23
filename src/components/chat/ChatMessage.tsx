@@ -16,48 +16,48 @@ const formatMessage = (text: string) => {
   return formatted;
 };
 
-// Function to extract all card identifiers from text
-const extractCardIdentifiers = (text: string): { single: string[], arrays: Array<{ identifiers: string[], originalText: string }> } => {
-  const single: string[] = [];
-  const arrays: Array<{ identifiers: string[], originalText: string }> = [];
-  
-  // First, find array patterns like [<skill_ai>, <skill_leadership>]
-  const arrayPattern = /\[([^\]]*(?:<(?:work_|project_|tool_|skill_|gallery_)[^>]+|aboutmecard>[^\]]*)*)\]/g;
-  let arrayMatch;
-  
-  while ((arrayMatch = arrayPattern.exec(text)) !== null) {
-    const arrayContent = arrayMatch[1];
-    const originalText = arrayMatch[0];
-    
-    // Extract identifiers from the array content
-    const identifierPattern = /<((?:work_|project_|tool_|skill_|gallery_)[^>]+|aboutmecard)>/g;
-    const identifiers: string[] = [];
-    let identifierMatch;
-    
-    while ((identifierMatch = identifierPattern.exec(arrayContent)) !== null) {
-      identifiers.push(identifierMatch[1]);
-    }
-    
-    if (identifiers.length > 0) {
-      arrays.push({ identifiers, originalText });
-    }
-  }
-  
-  // Then find individual identifiers that are not part of arrays
-  let textWithoutArrays = text;
-  arrays.forEach(array => {
-    textWithoutArrays = textWithoutArrays.replace(array.originalText, '');
-  });
-  
-  const singlePattern = /<((?:work_|project_|tool_|skill_|gallery_)[^>]+|aboutmecard)>/g;
-  let singleMatch;
-  
-  while ((singleMatch = singlePattern.exec(textWithoutArrays)) !== null) {
-    single.push(singleMatch[1]);
-  }
-  
-  return { single, arrays };
-};
+// Function to extract all card identifiers from text (unused but kept for future features)
+// const extractCardIdentifiers = (text: string): { single: string[], arrays: Array<{ identifiers: string[], originalText: string }> } => {
+//   const single: string[] = [];
+//   const arrays: Array<{ identifiers: string[], originalText: string }> = [];
+//   
+//   // First, find array patterns like [<skill_ai>, <skill_leadership>]
+//   const arrayPattern = /\[([^\]]*(?:<(?:work_|project_|tool_|skill_|gallery_)[^>]+|aboutmecard>[^\]]*)*)\]/g;
+//   let arrayMatch;
+//   
+//   while ((arrayMatch = arrayPattern.exec(text)) !== null) {
+//     const arrayContent = arrayMatch[1];
+//     const originalText = arrayMatch[0];
+//     
+//     // Extract identifiers from the array content
+//     const identifierPattern = /<((?:work_|project_|tool_|skill_|gallery_)[^>]+|aboutmecard)>/g;
+//     const identifiers: string[] = [];
+//     let identifierMatch;
+//     
+//     while ((identifierMatch = identifierPattern.exec(arrayContent)) !== null) {
+//       identifiers.push(identifierMatch[1]);
+//     }
+//     
+//     if (identifiers.length > 0) {
+//       arrays.push({ identifiers, originalText });
+//     }
+//   }
+//   
+//   // Then find individual identifiers that are not part of arrays
+//   let textWithoutArrays = text;
+//   arrays.forEach(array => {
+//     textWithoutArrays = textWithoutArrays.replace(array.originalText, '');
+//   });
+//   
+//   const singlePattern = /<((?:work_|project_|tool_|skill_|gallery_)[^>]+|aboutmecard)>/g;
+//   let singleMatch;
+//   
+//   while ((singleMatch = singlePattern.exec(textWithoutArrays)) !== null) {
+//     single.push(singleMatch[1]);
+//   }
+//   
+//   return { single, arrays };
+// };
 
 // New function to format bot messages with better structure
 const formatBotMessage = (text: string) => {

@@ -1,4 +1,4 @@
-import React from 'react';
+// import React from 'react'; // Not needed with React 17+ JSX transform
 import WorkExperienceCard from './WorkExperienceCard';
 import ProjectCard from './ProjectCard';
 import SkillCard from './SkillCard';
