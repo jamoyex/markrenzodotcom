@@ -6,24 +6,42 @@ if (typeof window === 'undefined') {
   dotenv.config();
 }
 
-// Database connection configuration
-const dbConfig = {
-  host: process.env.DB_HOST || '194.31.53.67',
-  port: parseInt(process.env.DB_PORT || '5438'),
-  database: process.env.DB_NAME || 'postgres',
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'Rf7t2JV1AIhpCIGhvkasnB1c6tJWvfVI7BAcjKyq0vzUR2uEXcGITpjTY7tV6TuN',
-  ssl: false, // Disable SSL since server doesn't support it
-  max: 20, // Maximum number of connections
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-};
+// Only create database connection server-side
+let pool: Pool | null = null;
 
-// Create connection pool
-export const pool = new Pool(dbConfig);
+if (typeof window === 'undefined') {
+  // Database connection configuration - ONLY from environment variables
+  const dbConfig = {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : undefined,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    ssl: false,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000,
+  };
+
+  // Validate required environment variables
+  if (!dbConfig.host || !dbConfig.port || !dbConfig.database || !dbConfig.user || !dbConfig.password) {
+    console.error('Missing required database environment variables. Please check your .env file.');
+    console.error('Required: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD');
+  } else {
+    // Create connection pool only if all env vars are present
+    pool = new Pool(dbConfig);
+  }
+}
+
+// Export pool (will be null in browser)
+export { pool };
 
 // Test database connection
 export async function testConnection(): Promise<boolean> {
+  if (!pool) {
+    console.error('Database pool not available - running in browser context');
+    return false;
+  }
   try {
     const client = await pool.connect();
     const result = await client.query('SELECT NOW() as current_time, version() as pg_version');
@@ -40,6 +58,7 @@ export async function testConnection(): Promise<boolean> {
 
 // Portfolio data fetching functions
 export async function fetchWorkExperience(identifier?: string) {
+  if (!pool) throw new Error('Database not available');
   try {
     const client = await pool.connect();
     let query = 'SELECT * FROM work_experience WHERE is_active = true';
@@ -63,6 +82,7 @@ export async function fetchWorkExperience(identifier?: string) {
 }
 
 export async function fetchProjects(identifier?: string) {
+  if (!pool) throw new Error('Database not available');
   try {
     const client = await pool.connect();
     let query = 'SELECT * FROM projects WHERE is_active = true';
@@ -86,6 +106,7 @@ export async function fetchProjects(identifier?: string) {
 }
 
 export async function fetchTools(identifier?: string) {
+  if (!pool) throw new Error('Database not available');
   try {
     const client = await pool.connect();
     let query = 'SELECT * FROM tools WHERE is_active = true';
@@ -109,6 +130,7 @@ export async function fetchTools(identifier?: string) {
 }
 
 export async function fetchSkills(identifier?: string) {
+  if (!pool) throw new Error('Database not available');
   try {
     const client = await pool.connect();
     let query = 'SELECT * FROM skills WHERE is_active = true';
@@ -132,6 +154,7 @@ export async function fetchSkills(identifier?: string) {
 }
 
 export async function fetchGallery(identifier?: string) {
+  if (!pool) throw new Error('Database not available');
   try {
     const client = await pool.connect();
     let query = 'SELECT * FROM gallery WHERE is_active = true';
@@ -156,6 +179,7 @@ export async function fetchGallery(identifier?: string) {
 
 // Function to get all available identifiers (for AI context)
 export async function getAllIdentifiers() {
+  if (!pool) throw new Error('Database not available');
   try {
     const client = await pool.connect();
     
@@ -188,11 +212,13 @@ export async function getAllIdentifiers() {
   }
 }
 
-// Graceful shutdown
-process.on('SIGINT', () => {
-  console.log('🔄 Shutting down gracefully...');
-  pool.end(() => {
-    console.log('✅ Database pool closed');
-    process.exit(0);
+// Graceful shutdown (only in server environment)
+if (typeof window === 'undefined' && pool) {
+  process.on('SIGINT', () => {
+    console.log('🔄 Shutting down gracefully...');
+    pool!.end(() => {
+      console.log('✅ Database pool closed');
+      process.exit(0);
+    });
   });
-}); 
+} 

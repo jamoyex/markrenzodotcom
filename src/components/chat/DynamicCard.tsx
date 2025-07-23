@@ -1,46 +1,26 @@
-import { useState, useEffect } from 'react';
+import React from 'react';
 import WorkExperienceCard from './WorkExperienceCard';
 import ProjectCard from './ProjectCard';
 import SkillCard from './SkillCard';
 import ToolCard from './ToolCard';
 import AboutCard from './AboutCard';
-import { getPortfolioItem } from '../../lib/api.js';
+import GalleryCard from './GalleryCard';
+import { usePortfolioData } from '../../context/PortfolioDataContext';
 
 interface DynamicCardProps {
   identifier: string;
 }
 
 export default function DynamicCard({ identifier }: DynamicCardProps) {
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [cardType, setCardType] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Fetch real data from database
-        const result = await getPortfolioItem(identifier);
-        
-        if (!result) {
-          throw new Error(`No data found for identifier: ${identifier}`);
-        }
-        
-        setCardType(result.type);
-        setData(result.data);
-      } catch (err) {
-        console.error('Error fetching card data:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [identifier]);
+  const { getItem, isLoading: globalLoading, error: globalError } = usePortfolioData();
+  
+  // Get data from preloaded cache
+  const result = getItem(identifier);
+  
+  const loading = globalLoading;
+  const error = globalError || (!result ? `No data found for identifier: ${identifier}` : null);
+  const cardType = result?.type || null;
+  const data = result?.data || null;
 
   if (loading) {
     return (
@@ -83,6 +63,8 @@ export default function DynamicCard({ identifier }: DynamicCardProps) {
     return <SkillCard data={data} />;
   } else if (cardType === 'tool') {
     return <ToolCard data={data} />;
+  } else if (cardType === 'gallery') {
+    return <GalleryCard data={data} />;
   } else if (cardType === 'about' || identifier === 'aboutmecard') {
     return <AboutCard />;
   }

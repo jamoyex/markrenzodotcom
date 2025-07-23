@@ -488,7 +488,13 @@ body {
 
 
 .conversation-started #input-container {
-  background: linear-gradient(to top, var(--color-background) 60%, rgba(10, 10, 10, 0.8) 80%, transparent);
+  background: 
+    radial-gradient(ellipse at center bottom, var(--color-background) 30%, rgba(10, 10, 10, 0.7) 50%, rgba(10, 10, 10, 0.4) 70%, rgba(10, 10, 10, 0.2) 85%, transparent),
+    linear-gradient(to top, var(--color-background) 40%, rgba(10, 10, 10, 0.3) 70%, rgba(10, 10, 10, 0.1) 90%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 32px 32px 0 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 #input-container {
@@ -499,7 +505,7 @@ body {
   padding: var(--space-3) var(--space-4);
   padding-top: 2rem; /* Space above for scroll button */
   background: transparent;
-  z-index: 10;
+  z-index: 3;
   width: 100%;
   max-width: 48rem;
   margin: 0 auto;
@@ -983,17 +989,4 @@ body {
   scroll-snap-align: start;
 }
 
-.horizontal-card-scroller {
-  scroll-snap-type: x proximity;
-}
-
-/* Hide scrollbar on mobile for cleaner look */
-@media (max-width: 768px) {
-  .horizontal-card-scroller::-webkit-scrollbar {
-    height: 3px;
-  }
-  
-  .horizontal-card-scroller {
-    scrollbar-width: none;
-  }
-} 
+/* Simple horizontal scrolling for card arrays */ 

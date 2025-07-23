@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Message } from '../../types/chat';
 import DynamicCard from './DynamicCard';
-import HorizontalCardScroller from './HorizontalCardScroller';
 import BlurText from '../ui/BlurText';
 
 interface ChatMessageProps {
@@ -130,86 +130,277 @@ const formatBotMessage = (text: string) => {
   ));
 };
 
+const CardCarousel = ({ cards }: { cards: string[] }) => {
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [isAnimating, setIsAnimating] = React.useState(false);
+
+  const goNext = () => {
+    if (isAnimating) return;
+    console.log('Next button clicked!', currentIndex);
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev + 1) % cards.length);
+    setTimeout(() => setIsAnimating(false), 300);
+  };
+
+  const goPrev = () => {
+    if (isAnimating) return;
+    console.log('Prev button clicked!', currentIndex);
+    setIsAnimating(true);
+    setCurrentIndex((prev) => (prev - 1 + cards.length) % cards.length);
+    setTimeout(() => setIsAnimating(false), 300);
+  };
+
+  return (
+    <div 
+      style={{
+        width: '100%',
+        minWidth: '100%',
+        minHeight: '250px',
+        margin: '16px 0',
+        padding: '20px',
+        background: 'rgba(255, 255, 255, 0.05)',
+        borderRadius: '12px',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        position: 'relative',
+        boxSizing: 'border-box',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+      onMouseEnter={() => console.log('Carousel hover')}
+    >
+      {/* Current Card */}
+      <div style={{ 
+        flex: 1,
+        margin: '0 60px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative'
+      }}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ 
+              duration: 0.3, 
+              ease: [0.25, 0.46, 0.45, 0.94] 
+            }}
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center'
+            }}
+          >
+            <DynamicCard identifier={cards[currentIndex]} />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      {/* Left Arrow */}
+      {cards.length > 1 && (
+        <motion.button
+          onClick={goPrev}
+          disabled={isAnimating}
+          onMouseDown={(e) => {
+            console.log('Mouse down on prev button');
+            e.stopPropagation();
+          }}
+          animate={{ y: '-50%' }}
+          whileHover={{ 
+            scale: isAnimating ? 1 : 1.2, 
+            opacity: isAnimating ? 0.3 : 1,
+            y: '-50%'
+          }}
+          whileTap={{ 
+            scale: isAnimating ? 1 : 0.9,
+            y: '-50%'
+          }}
+          style={{
+            position: 'absolute',
+            left: '15px',
+            top: '50%',
+            transformOrigin: 'center',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '0',
+            width: '30px',
+            height: '30px',
+            color: 'rgba(255, 255, 255, 0.8)',
+            cursor: isAnimating ? 'not-allowed' : 'pointer',
+            fontSize: '24px',
+            fontWeight: '300',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            pointerEvents: 'all',
+            opacity: isAnimating ? 0.3 : 0.8,
+            transition: 'opacity 0.2s ease'
+          }}
+        >
+          ←
+        </motion.button>
+      )}
+
+      {/* Right Arrow */}
+      {cards.length > 1 && (
+        <motion.button
+          onClick={goNext}
+          disabled={isAnimating}
+          onMouseDown={(e) => {
+            console.log('Mouse down on next button');
+            e.stopPropagation();
+          }}
+          animate={{ y: '-50%' }}
+          whileHover={{ 
+            scale: isAnimating ? 1 : 1.2, 
+            opacity: isAnimating ? 0.3 : 1,
+            y: '-50%'
+          }}
+          whileTap={{ 
+            scale: isAnimating ? 1 : 0.9,
+            y: '-50%'
+          }}
+          style={{
+            position: 'absolute',
+            right: '15px',
+            top: '50%',
+            transformOrigin: 'center',
+            background: 'transparent',
+            border: 'none',
+            borderRadius: '0',
+            width: '30px',
+            height: '30px',
+            color: 'rgba(255, 255, 255, 0.8)',
+            cursor: isAnimating ? 'not-allowed' : 'pointer',
+            fontSize: '24px',
+            fontWeight: '300',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            pointerEvents: 'all',
+            opacity: isAnimating ? 0.3 : 0.8,
+            transition: 'opacity 0.2s ease'
+          }}
+        >
+          →
+        </motion.button>
+      )}
+
+      {/* Card Counter */}
+      {cards.length > 1 && (
+        <div style={{
+          position: 'absolute',
+          bottom: '8px',
+          right: '16px',
+          fontSize: '12px',
+          color: 'rgba(255, 255, 255, 0.6)',
+          background: 'rgba(0, 0, 0, 0.3)',
+          padding: '4px 8px',
+          borderRadius: '12px'
+        }}>
+          {currentIndex + 1} / {cards.length}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const renderMessageContent = (content: string, isUser: boolean) => {
   if (isUser) {
     return <div dangerouslySetInnerHTML={{ __html: formatMessage(content) }} />;
   }
 
-  // For bot messages, check for card identifiers
-  const { single: singleCards, arrays: cardArrays } = extractCardIdentifiers(content);
-  
-  if (singleCards.length === 0 && cardArrays.length === 0) {
-    // No cards, just render regular text with animation
-    return <div>{formatBotMessage(content)}</div>;
+  // Handle carousel: if content has [], parse text + carousel + text
+  if (content.includes('[') && content.includes(']')) {
+    const elements: JSX.Element[] = [];
+    let elementKey = 0;
+    
+    // Split by array pattern [<...>,<...>]
+    const arrayPattern = /\[([^\]]*<[^>]+[^\]]*)\]/;
+    const match = content.match(arrayPattern);
+    
+    if (match) {
+      const beforeCarousel = content.substring(0, match.index);
+      const afterCarousel = content.substring(match.index! + match[0].length);
+      const arrayContent = match[1];
+      
+      // Add text before carousel
+      if (beforeCarousel && beforeCarousel.trim()) {
+        elements.push(
+          <div key={`text-before-${elementKey++}`}>
+            {formatBotMessage(beforeCarousel.trim())}
+          </div>
+        );
+      }
+      
+      // Add carousel
+      const cardTags = arrayContent.match(/<[^>]+>/g);
+      if (cardTags) {
+        const identifiers = cardTags.map(tag => tag.replace(/[<>]/g, ''));
+        elements.push(
+          <CardCarousel key={`carousel-${elementKey++}`} cards={identifiers} />
+        );
+      }
+      
+      // Add text after carousel
+      if (afterCarousel && afterCarousel.trim()) {
+        elements.push(
+          <div key={`text-after-${elementKey++}`}>
+            {formatBotMessage(afterCarousel.trim())}
+          </div>
+        );
+      }
+      
+      return <div>{elements}</div>;
+    }
   }
 
-  // Process content with both single cards and arrays
-  let remainingContent = content;
-  const elements: JSX.Element[] = [];
-  let elementKey = 0;
+  // Handle multiple individual cards
+  if (content.includes('<') && content.includes('>')) {
+    const cardTags = content.match(/<[^>]+>/g);
+    if (cardTags) {
+      const parts = content.split(/<[^>]+>/);
+      const elements: JSX.Element[] = [];
+      let elementKey = 0;
 
-  // First, handle arrays (they take priority)
-  cardArrays.forEach((arrayData) => {
-    const parts = remainingContent.split(arrayData.originalText);
-    
-    // Add text before the array (if any)
-    if (parts[0] && parts[0].trim()) {
-      elements.push(
-        <div key={`text-${elementKey++}`}>
-          {formatBotMessage(parts[0].trim())}
-        </div>
-      );
+      // Interleave text parts and cards
+      for (let i = 0; i < parts.length; i++) {
+        // Add text part if not empty
+        if (parts[i] && parts[i].trim()) {
+          elements.push(
+            <div key={`text-${elementKey++}`}>
+              {formatBotMessage(parts[i].trim())}
+            </div>
+          );
+        }
+        
+        // Add card if it exists
+        if (cardTags[i]) {
+          const identifier = cardTags[i].replace(/[<>]/g, '');
+          elements.push(
+            <DynamicCard key={`card-${elementKey++}`} identifier={identifier} />
+          );
+        }
+      }
+
+      return <div>{elements}</div>;
     }
-    
-    // Add the horizontal scroller for the array
-    elements.push(
-      <HorizontalCardScroller 
-        key={`array-${elementKey++}`} 
-        identifiers={arrayData.identifiers} 
-      />
-    );
-    
-    // Update remaining content
-    remainingContent = parts.slice(1).join(arrayData.originalText);
-  });
-
-  // Then handle single cards in the remaining content
-  singleCards.forEach((identifier) => {
-    const cardTag = `<${identifier}>`;
-    const parts = remainingContent.split(cardTag);
-    
-    // Add text before the card (if any)
-    if (parts[0] && parts[0].trim()) {
-      elements.push(
-        <div key={`text-${elementKey++}`}>
-          {formatBotMessage(parts[0].trim())}
-        </div>
-      );
-    }
-    
-    // Add the single card
-    elements.push(
-      <DynamicCard key={`card-${elementKey++}`} identifier={identifier} />
-    );
-    
-    // Update remaining content
-    remainingContent = parts.slice(1).join(cardTag);
-  });
-
-  // Add any remaining text after the last card/array
-  if (remainingContent && remainingContent.trim()) {
-    elements.push(
-      <div key={`text-${elementKey++}`}>
-        {formatBotMessage(remainingContent.trim())}
-      </div>
-    );
   }
 
-  return <div>{elements}</div>;
+  // Regular text
+  return <div>{formatBotMessage(content)}</div>;
 };
 
 export default function ChatMessage({ message }: ChatMessageProps) {
   const { content, isUser } = message;
+
+  // Check if this is a carousel message
+  const hasCarousel = !isUser && content.includes('[') && content.includes(']');
 
   const messageStyle = isUser ? {
     backgroundColor: 'rgba(52, 53, 65, 0.9)',
@@ -219,6 +410,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     width: 'fit-content'
   } : {
     color: 'var(--color-text-primary)',
+    width: hasCarousel ? '100%' : 'auto',
     maxWidth: '100%'
   };
 
