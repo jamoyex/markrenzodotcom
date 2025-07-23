@@ -3,6 +3,7 @@ import Aurora from './components/Aurora/Aurora';
 import ChatContainer from './components/chat/ChatContainer';
 import { ChatProvider, useChat } from './context/ChatContext';
 import BlurText from './components/ui/BlurText';
+import SplashCursor from './components/ui/SplashCursor';
 import { heroImage } from '@/assets';
 
 function ChatInterface() {
@@ -201,6 +202,15 @@ export default function App() {
         blend={isMobile ? 1.2 : 0.5}
         amplitude={isMobile ? 3.0 : 1.0}
         speed={0.5}
+      />
+      <SplashCursor 
+        COLOR_UPDATE_SPEED={1}        // Even slower color changes
+        DENSITY_DISSIPATION={1.2}     // Colors fade faster (was 0.5)
+        VELOCITY_DISSIPATION={1.0}    // Movement dissipates quicker (was 0.1)
+        SPLAT_FORCE={800}             // Much gentler splash intensity
+        CURL={0.5}                    // Very smooth fluid motion
+        SPLAT_RADIUS={0.4}            // Larger, gentler splash radius
+        SIM_RESOLUTION={64}           // Lower simulation resolution for smoother performance
       />
       <ChatInterface />
     </ChatProvider>
