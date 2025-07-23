@@ -8,7 +8,7 @@
     "server": "npx tsx server/index.ts",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "tsc -b && vite build",
-    "start": "npx tsx server/index.ts",
+    "start": "NODE_ENV=production npx tsx server/index.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "db:setup": "npx tsx scripts/setup-database.ts",

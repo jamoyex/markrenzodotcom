@@ -42,7 +42,21 @@ app.get('/api/portfolio/:identifier', async (req, res) => {
       });
     }
 
-    const result = await getPortfolioItemFromDatabase(identifier);
+    let result;
+    
+    try {
+      result = await getPortfolioItemFromDatabase(identifier);
+    } catch (dbError) {
+      console.error('Database Error:', dbError);
+      // Return fallback data if database fails
+      return res.json({
+        type: 'skill',
+        name: identifier.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        identifier,
+        fallback: true,
+        description: 'Database connection temporarily unavailable'
+      });
+    }
     
     if (result) {
       res.json(result);
@@ -51,23 +65,45 @@ app.get('/api/portfolio/:identifier', async (req, res) => {
     }
   } catch (error) {
     console.error('API Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
 app.get('/api/identifiers', async (req, res) => {
   try {
-    const identifiers = await getAllIdentifiersFromDatabase();
+    let identifiers;
+    
+    try {
+      identifiers = await getAllIdentifiersFromDatabase();
+    } catch (dbError) {
+      console.error('Database Error:', dbError);
+      // Return fallback identifiers if database fails
+      return res.json({
+        skills: ['skill_ai', 'skill_leadership', 'skill_fullstack'],
+        projects: ['project_portfolio', 'project_chatbot'],
+        work: ['work_freelance'],
+        tools: ['tool_react', 'tool_nodejs'],
+        gallery: ['gallery_ui', 'gallery_mobile'],
+        fallback: true
+      });
+    }
+    
     res.json(identifiers);
   } catch (error) {
     console.error('API Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: error.message });
   }
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'API server is running' });
+  res.json({ 
+    status: 'OK', 
+    message: 'API server is running',
+    environment: process.env.NODE_ENV || 'development',
+    port: port,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Serve React app for all non-API routes (production only)
