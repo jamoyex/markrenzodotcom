@@ -43,6 +43,7 @@ npm run db:setup
 - Uses multi-stage Docker build
 - Production dependencies only in final image
 - Serves React app + API server on port 3001
+- **IMPORTANT**: Server binds to `0.0.0.0:3001` (required for containers)
 
 ## ✅ **Health Check**
 The application provides a health check endpoint at:
@@ -52,21 +53,72 @@ GET /api/health
 
 ## 🔧 **Common Issues & Solutions**
 
+### Issue: "502 Bad Gateway" from Cloudflare
+**Root Cause**: Application not starting properly in container
+
+**✅ Debug Steps**:
+1. Check Coolify container logs for startup errors
+2. Verify all environment variables are set
+3. Ensure database connectivity (app will run without DB but with fallbacks)
+4. Check if port 3001 is properly exposed
+
+**✅ App Features**: 
+- Comprehensive startup logging
+- Graceful database error handling
+- Fallback data when database unavailable
+- Global error handlers prevent crashes
+
 ### Issue: "Database connection failed"
+- ✅ App will continue running with fallback data
+- ✅ No database crashes - all DB errors are handled gracefully
 - ✅ Verify all `DB_*` environment variables are set
 - ✅ Check database connectivity from container
-- ✅ Ensure database accepts connections from container IP
 
 ### Issue: "Module not found" errors
 - ✅ Fixed in latest version with proper TypeScript imports
 - ✅ Server uses `tsx` for TypeScript execution
+- ✅ Top-level await support for database imports
 
 ### Issue: "Build fails with dependency issues"
 - ✅ Fixed with multi-stage Docker build
 - ✅ DevDependencies available during build, removed in production
+- ✅ Build verification steps included in Dockerfile
+
+### Issue: "Static files not found"
+- ✅ Fixed: Server properly serves from `/dist` directory  
+- ✅ Comprehensive logging shows file paths
+- ✅ Dockerfile verification ensures files are copied correctly
+
+## 🚨 **Debugging Production Issues**
+
+### View Application Logs
+```bash
+# In Coolify, check the container logs for:
+🚀 Starting Mark Renzo Portfolio Server...
+📊 Environment: production
+🌐 Port: 3001
+📁 Serving static files from: /app/dist
+✅ Database functions loaded successfully
+🚀 API Server running on http://0.0.0.0:3001
+✅ Server startup complete!
+```
+
+### Test Health Endpoint
+```bash
+curl https://your-domain.com/api/health
+# Should return:
+{
+  "status": "OK",
+  "message": "API server is running",
+  "environment": "production",
+  "port": 3001,
+  "database": "loaded" // or "fallback"
+}
+```
 
 ## 📦 **Application Architecture**
 - **Frontend**: React + Vite (served as static files)
 - **Backend**: Express.js API server
-- **Database**: PostgreSQL
-- **Runtime**: Node.js 18 with TypeScript support via tsx 
+- **Database**: PostgreSQL (with graceful fallbacks)
+- **Runtime**: Node.js 18 with TypeScript support via tsx
+- **Error Handling**: Comprehensive logging + graceful error recovery 

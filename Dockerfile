@@ -16,6 +16,9 @@ COPY . .
 # Build the application
 RUN npm run build
 
+# Verify build output
+RUN ls -la dist/
+
 # Production stage
 FROM node:18-alpine AS production
 
@@ -32,6 +35,11 @@ RUN npm ci --only=production
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/server ./server
 COPY --from=builder /app/src ./src
+
+# Verify files are copied correctly
+RUN ls -la .
+RUN ls -la dist/
+RUN ls -la server/
 
 # Expose port
 EXPOSE 3001
