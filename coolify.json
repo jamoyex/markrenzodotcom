@@ -2,7 +2,7 @@
   "name": "markrenzo-portfolio",
   "type": "application",
   "buildCommand": "npm run build",
-  "startCommand": "npm start",
+  "startCommand": "npm run start:prod",
   "port": 3001,
   "healthCheckPath": "/api/health",
   "environment": {

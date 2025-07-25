@@ -1,4 +1,4 @@
-import { fetchWorkExperience, fetchProjects, fetchTools, fetchSkills, fetchGallery } from './database.js';
+import { fetchWorkExperience, fetchProjects, fetchTools, fetchSkills, fetchGallery } from './database.ts';
 
 // Server-side API functions that query PostgreSQL directly
 export async function getPortfolioItemFromDatabase(identifier: string) {
@@ -46,7 +46,7 @@ export async function getPortfolioItemFromDatabase(identifier: string) {
 // Get all available identifiers from database
 export async function getAllIdentifiersFromDatabase() {
   try {
-    const { getAllIdentifiers } = await import('./database.js');
+    const { getAllIdentifiers } = await import('./database.ts');
     return await getAllIdentifiers();
   } catch (error) {
     console.error('Error fetching identifiers from database:', error);

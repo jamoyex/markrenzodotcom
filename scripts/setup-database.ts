@@ -1,4 +1,4 @@
-import { pool, testConnection } from '../src/lib/database.js';
+import { pool, testConnection } from '../src/lib/database.ts';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';

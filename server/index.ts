@@ -23,7 +23,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Import database functions
-import { getPortfolioItemFromDatabase, getAllIdentifiersFromDatabase } from '../src/lib/api-server.js';
+import { getPortfolioItemFromDatabase, getAllIdentifiersFromDatabase } from '../src/lib/api-server.ts';
 
 // API Routes
 app.get('/api/portfolio/:identifier', async (req, res) => {
