@@ -50,11 +50,15 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
         throw new Error('Server returned invalid JSON');
       }
       
-      // Flatten the categorized response into a single array
+      // Flatten the categorized response into a single array of identifier strings
       const identifiers: string[] = [];
       Object.values(identifiersData).forEach((category: any) => {
         if (Array.isArray(category)) {
-          identifiers.push(...category);
+          category.forEach((item: any) => {
+            if (item.identifier) {
+              identifiers.push(item.identifier);
+            }
+          });
         }
       });
 
@@ -81,7 +85,7 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
       const newPortfolioData: PortfolioData = {};
       results.forEach((result) => {
         if (result) {
-          newPortfolioData[result.identifier] = result.data;
+          newPortfolioData[result.identifier] = result.data; // Store the full API response
         }
       });
 
