@@ -1,0 +1,10 @@
+# Configure Nixpacks for full-stack Node.js app (not SPA)
+[variables]
+NODE_ENV = "production"
+PORT = "3005"
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm run start:prod" 
