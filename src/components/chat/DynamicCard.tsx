@@ -12,10 +12,10 @@ interface DynamicCardProps {
 }
 
 export default function DynamicCard({ identifier }: DynamicCardProps) {
-  const { getItem, isLoading: globalLoading, error: globalError } = usePortfolioData();
+  const { portfolioData, isLoading: globalLoading, error: globalError } = usePortfolioData();
   
   // Get data from preloaded cache
-  const result = getItem(identifier);
+  const result = portfolioData[identifier];
   
   const loading = globalLoading;
   const error = globalError || (!result ? `No data found for identifier: ${identifier}` : null);
