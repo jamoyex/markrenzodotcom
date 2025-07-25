@@ -202,4 +202,8 @@ process.on('unhandledRejection', (reason, promise) => {
   console.log('🔄 Server continuing to run...');
 });
 
-console.log('✅ Server startup complete!'); 
+console.log('✅ Server startup complete!');
+console.log('🌐 You can test the API at:');
+console.log(`   • Health: http://0.0.0.0:${port}/api/health`);
+console.log(`   • Test: http://0.0.0.0:${port}/api/test`);
+console.log(`   • Identifiers: http://0.0.0.0:${port}/api/identifiers`); 
