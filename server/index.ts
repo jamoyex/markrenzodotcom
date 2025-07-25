@@ -3,13 +3,14 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { logger, createSafeErrorResponse } from '../src/lib/logger.ts';
 
 // Load environment variables
 dotenv.config();
 
-console.log('🚀 Starting Mark Renzo Portfolio Server...');
-console.log('📊 Environment:', process.env.NODE_ENV || 'development');
-console.log('🌐 Port:', process.env.PORT || 3005);
+logger.info('🚀 Starting Mark Renzo Portfolio Server...');
+logger.info('📊 Environment:', process.env.NODE_ENV || 'development');
+logger.info('🌐 Port:', process.env.PORT || 3005);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,14 +24,14 @@ app.use(express.json());
 
 // Debug middleware to log all requests
 app.use((req, res, next) => {
-  console.log(`📨 ${req.method} ${req.path} - ${req.get('User-Agent') ? 'Browser' : 'API'}`);
+  logger.debug(`📨 ${req.method} ${req.path}`);
   next();
 });
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
   const distPath = join(__dirname, '../dist');
-  console.log('📁 Serving static files from:', distPath);
+  logger.info('📁 Serving static files from:', distPath);
   app.use(express.static(distPath));
 }
 
@@ -44,15 +45,15 @@ try {
   getPortfolioItemFromDatabase = dbModule.getPortfolioItemFromDatabase;
   getAllIdentifiersFromDatabase = dbModule.getAllIdentifiersFromDatabase;
   dbFunctionsAvailable = true;
-  console.log('✅ Database functions loaded successfully');
+  logger.success('Database functions loaded successfully');
 } catch (error) {
-  console.error('❌ Failed to load database functions:', error);
-  console.log('🔄 Server will continue with fallback data only');
+  logger.error('Failed to load database functions:', error);
+  logger.info('🔄 Server will continue with fallback data only');
 }
 
 // API Routes
 app.get('/api/portfolio/:identifier', async (req, res) => {
-  console.log('🔍 API Request: /api/portfolio/' + req.params.identifier);
+  logger.debug('API Request: /api/portfolio/' + req.params.identifier);
   try {
     const { identifier } = req.params;
     
@@ -74,7 +75,7 @@ app.get('/api/portfolio/:identifier', async (req, res) => {
       try {
         result = await getPortfolioItemFromDatabase(identifier);
       } catch (dbError) {
-        console.error('Database Error:', dbError);
+        logger.error('Database Error:', dbError);
         // Return fallback data if database fails
         return res.json({
           type: 'skill',
@@ -101,13 +102,13 @@ app.get('/api/portfolio/:identifier', async (req, res) => {
       res.status(404).json({ error: 'Portfolio item not found' });
     }
   } catch (error) {
-    console.error('API Error:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message });
+    logger.error('API Error:', error);
+    res.status(500).json(createSafeErrorResponse('Internal server error', error));
   }
 });
 
 app.get('/api/identifiers', async (req, res) => {
-  console.log('🔍 API Request: /api/identifiers');
+  logger.debug('API Request: /api/identifiers');
   try {
     let identifiers;
     
@@ -115,7 +116,7 @@ app.get('/api/identifiers', async (req, res) => {
       try {
         identifiers = await getAllIdentifiersFromDatabase();
       } catch (dbError) {
-        console.error('Database Error:', dbError);
+        logger.error('Database Error:', dbError);
         // Return fallback identifiers if database fails
         return res.json({
           skills: ['skill_ai', 'skill_leadership', 'skill_fullstack'],
@@ -140,14 +141,14 @@ app.get('/api/identifiers', async (req, res) => {
     
     res.json(identifiers);
   } catch (error) {
-    console.error('API Error:', error);
-    res.status(500).json({ error: 'Internal server error', details: error.message });
+    logger.error('API Error:', error);
+    res.status(500).json(createSafeErrorResponse('Internal server error', error));
   }
 });
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  console.log('🔍 API Request: /api/health');
+  logger.debug('API Request: /api/health');
   res.json({ 
     status: 'OK', 
     message: 'API server is running',
@@ -160,7 +161,7 @@ app.get('/api/health', (req, res) => {
 
 // Simple test endpoint that doesn't depend on database
 app.get('/api/test', (req, res) => {
-  console.log('🔍 API Request: /api/test');
+  logger.debug('API Request: /api/test');
   res.json({ 
     message: 'API is working!',
     timestamp: new Date().toISOString(),
@@ -170,40 +171,39 @@ app.get('/api/test', (req, res) => {
 
 // Handle 404 for API routes specifically
 app.use('/api/*', (req, res) => {
-  console.log('❌ API 404:', req.path);
-  res.status(404).json({ error: 'API endpoint not found', path: req.path });
+  logger.warn('API 404:', req.path);
+  res.status(404).json({ error: 'API endpoint not found' });
 });
 
 // Serve React app for all non-API routes (production only)
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
-    console.log('📄 Serving React app for:', req.path);
+    logger.debug('Serving React app for:', req.path);
     const indexPath = join(__dirname, '../dist/index.html');
-    console.log('📁 Index path:', indexPath);
     res.sendFile(indexPath);
   });
 }
 
 // Start server - IMPORTANT: bind to 0.0.0.0 for Docker containers
 app.listen(port, '0.0.0.0', () => {
-  console.log(`🚀 API Server running on http://0.0.0.0:${port}`);
-  console.log(`🔗 Health check: http://0.0.0.0:${port}/api/health`);
-  console.log(`📂 Static files: ${process.env.NODE_ENV === 'production' ? 'enabled' : 'disabled'}`);
+  logger.success(`API Server running on http://0.0.0.0:${port}`);
+  logger.info(`Health check: http://0.0.0.0:${port}/api/health`);
+  logger.info(`Static files: ${process.env.NODE_ENV === 'production' ? 'enabled' : 'disabled'}`);
 });
 
 // Global error handlers to prevent crashes
 process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
-  console.log('🔄 Server continuing to run...');
+  logger.error('Uncaught Exception:', error);
+  logger.info('🔄 Server continuing to run...');
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
-  console.log('🔄 Server continuing to run...');
+  logger.error('Unhandled Rejection:', { reason, promise });
+  logger.info('🔄 Server continuing to run...');
 });
 
-console.log('✅ Server startup complete!');
-console.log('🌐 You can test the API at:');
-console.log(`   • Health: http://0.0.0.0:${port}/api/health`);
-console.log(`   • Test: http://0.0.0.0:${port}/api/test`);
-console.log(`   • Identifiers: http://0.0.0.0:${port}/api/identifiers`); 
+logger.success('Server startup complete!');
+logger.info('API endpoints available:');
+logger.info(`   • Health: http://0.0.0.0:${port}/api/health`);
+logger.info(`   • Test: http://0.0.0.0:${port}/api/test`);
+logger.info(`   • Identifiers: http://0.0.0.0:${port}/api/identifiers`); 

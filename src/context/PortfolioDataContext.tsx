@@ -1,17 +1,14 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface PortfolioData {
-  [identifier: string]: {
-    type: string;
-    data: any;
-  };
+  [key: string]: any;
 }
 
 interface PortfolioDataContextType {
   portfolioData: PortfolioData;
   isLoading: boolean;
   error: string | null;
-  getItem: (identifier: string) => any;
+  refetchData: () => Promise<void>;
 }
 
 const PortfolioDataContext = createContext<PortfolioDataContextType | undefined>(undefined);
@@ -31,111 +28,82 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const preloadAllData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  const preloadAllData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        // Get all available identifiers from the API
-        console.log('🔍 Fetching identifiers from:', `${API_BASE_URL}/identifiers`);
-        const identifiersResponse = await fetch(`${API_BASE_URL}/identifiers`);
-        
-        console.log('📊 Identifiers response status:', identifiersResponse.status);
-        console.log('📊 Identifiers response headers:', identifiersResponse.headers.get('content-type'));
-        
-        if (!identifiersResponse.ok) {
-          const errorText = await identifiersResponse.text();
-          console.error('❌ Identifiers fetch failed:', errorText);
-          throw new Error(`Failed to fetch identifiers: ${identifiersResponse.status}`);
-        }
-        
-        const responseText = await identifiersResponse.text();
-        console.log('📄 Raw response:', responseText.substring(0, 200) + '...');
-        
-        let identifiersData;
-        try {
-          identifiersData = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error('❌ JSON Parse Error:', parseError);
-          console.error('📄 Response that failed to parse:', responseText);
-          throw new Error('Server returned invalid JSON');
-        }
-        
-        // Flatten the categorized response into a single array
-        const identifiers: string[] = [];
-        Object.values(identifiersData).forEach((category: any) => {
-          if (Array.isArray(category)) {
-            category.forEach((item: any) => {
-              if (item.identifier) {
-                identifiers.push(item.identifier);
-              }
-            });
-          }
-        });
-        
-        console.log('🚀 Preloading portfolio data for identifiers:', identifiers);
-
-        // Fetch all portfolio items in parallel
-        const promises = identifiers.map(async (identifier: string) => {
-          try {
-            const response = await fetch(`${API_BASE_URL}/portfolio/${identifier}`);
-            if (response.ok) {
-              const data = await response.json();
-              return { identifier, data };
-            }
-            return null;
-          } catch (err) {
-            console.warn(`Failed to fetch ${identifier}:`, err);
-            return null;
-          }
-        });
-
-        const results = await Promise.all(promises);
-        
-        // Build the portfolio data cache
-        const dataCache: PortfolioData = {};
-        
-        // Add aboutmecard manually since it's handled specially
-        dataCache.aboutmecard = {
-          type: 'about',
-          data: {
-            name: "Mark Renzo Mariveles",
-            role: "Full-Stack Developer & AI Specialist",
-            bio: "Passionate about creating innovative digital solutions and helping businesses leverage AI technology."
-          }
-        };
-
-        // Add all fetched items
-        results.forEach(result => {
-          if (result && result.data) {
-            dataCache[result.identifier] = result.data;
-          }
-        });
-
-        setPortfolioData(dataCache);
-        console.log('✅ Portfolio data preloaded:', Object.keys(dataCache).length, 'items');
-        
-      } catch (err) {
-        console.error('❌ Failed to preload portfolio data:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setIsLoading(false);
+      // Get all available identifiers from the API
+      const identifiersResponse = await fetch(`${API_BASE_URL}/identifiers`);
+      
+      if (!identifiersResponse.ok) {
+        throw new Error(`Failed to fetch identifiers: ${identifiersResponse.status}`);
       }
-    };
+      
+      const responseText = await identifiersResponse.text();
+      
+      let identifiersData;
+      try {
+        identifiersData = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ JSON Parse Error:', parseError);
+        throw new Error('Server returned invalid JSON');
+      }
+      
+      // Flatten the categorized response into a single array
+      const identifiers: string[] = [];
+      Object.values(identifiersData).forEach((category: any) => {
+        if (Array.isArray(category)) {
+          identifiers.push(...category);
+        }
+      });
 
+      // Add special identifiers that don't come from the database
+      identifiers.push('aboutmecard');
+
+      // Preload data for all identifiers
+      const dataPromises = identifiers.map(async (identifier) => {
+        try {
+          const response = await fetch(`${API_BASE_URL}/portfolio/${identifier}`);
+          if (response.ok) {
+            const data = await response.json();
+            return { identifier, data };
+          }
+        } catch (error) {
+          console.warn(`Failed to preload data for ${identifier}:`, error);
+        }
+        return null;
+      });
+
+      const results = await Promise.all(dataPromises);
+      
+      // Build the portfolio data object
+      const newPortfolioData: PortfolioData = {};
+      results.forEach((result) => {
+        if (result) {
+          newPortfolioData[result.identifier] = result.data;
+        }
+      });
+
+      setPortfolioData(newPortfolioData);
+      
+    } catch (error) {
+      console.error('Failed to load portfolio data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load portfolio data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     preloadAllData();
   }, []);
 
-  const getItem = (identifier: string) => {
-    return portfolioData[identifier] || null;
-  };
-
-  const value: PortfolioDataContextType = {
+  const value = {
     portfolioData,
     isLoading,
     error,
-    getItem
+    refetchData: preloadAllData,
   };
 
   return (

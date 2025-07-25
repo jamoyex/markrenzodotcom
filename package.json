@@ -8,16 +8,14 @@
     "server": "npx tsx server/index.ts",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "tsc -b && vite build",
-    "build:server": "tsc server/index.ts --outDir server-dist --module ESNext --target ES2022 --moduleResolution bundler --allowImportingTsExtensions false",
-    "start": "npm run build && NODE_ENV=production node server-dist/index.js",
+
     "start:prod": "NODE_ENV=production npx tsx server/index.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "db:setup": "npx tsx scripts/setup-database.ts",
-    "db:test": "npx tsx -e \"import('./src/lib/database.js').then(db => db.testConnection().then(() => process.exit(0)))\"",
-    "db:create": "node scripts/create-tables.js",
-    "db:seed": "node scripts/insert-sample-data.js",
-    "db:reset": "npm run db:create && npm run db:seed"
+    "db:test": "npx tsx -e \"import('./src/lib/database.ts').then(db => db.testConnection().then(() => process.exit(0)))\"",
+
+    "db:reset": "npm run db:setup"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.0.5",
