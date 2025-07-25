@@ -1,0 +1,12 @@
+{
+  "name": "markrenzo-portfolio",
+  "type": "application",
+  "buildCommand": "npm run build",
+  "startCommand": "npm start",
+  "port": 3001,
+  "healthCheckPath": "/api/health",
+  "environment": {
+    "NODE_ENV": "production",
+    "PORT": "3001"
+  }
+} 

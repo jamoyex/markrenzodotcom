@@ -11,12 +11,13 @@ export default defineConfig({
     }
   },
   server: {
-    host: true, // Allow external hosts
+    host: '0.0.0.0', // Allow external hosts
     port: 5173,
     allowedHosts: [
       'localhost',
       '127.0.0.1',
-      'b4198e3285ec.ngrok-free.app'
+      '8a571a58b4de.ngrok-free.app',
+      '2f0dd302442f.ngrok-free.app'
     ]
   }
 }) 
