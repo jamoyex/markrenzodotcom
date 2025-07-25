@@ -9,17 +9,23 @@ dotenv.config();
 
 console.log('🚀 Starting Mark Renzo Portfolio Server...');
 console.log('📊 Environment:', process.env.NODE_ENV || 'development');
-console.log('🌐 Port:', process.env.PORT || 3001);
+console.log('🌐 Port:', process.env.PORT || 3005);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const port = parseInt(process.env.PORT || '3001', 10);
+const port = parseInt(process.env.PORT || '3005', 10);
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`📨 ${req.method} ${req.path} - ${req.get('User-Agent') ? 'Browser' : 'API'}`);
+  next();
+});
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
@@ -46,6 +52,7 @@ try {
 
 // API Routes
 app.get('/api/portfolio/:identifier', async (req, res) => {
+  console.log('🔍 API Request: /api/portfolio/' + req.params.identifier);
   try {
     const { identifier } = req.params;
     
@@ -100,6 +107,7 @@ app.get('/api/portfolio/:identifier', async (req, res) => {
 });
 
 app.get('/api/identifiers', async (req, res) => {
+  console.log('🔍 API Request: /api/identifiers');
   try {
     let identifiers;
     
@@ -139,6 +147,7 @@ app.get('/api/identifiers', async (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
+  console.log('🔍 API Request: /api/health');
   res.json({ 
     status: 'OK', 
     message: 'API server is running',
@@ -149,11 +158,28 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Simple test endpoint that doesn't depend on database
+app.get('/api/test', (req, res) => {
+  console.log('🔍 API Request: /api/test');
+  res.json({ 
+    message: 'API is working!',
+    timestamp: new Date().toISOString(),
+    server: 'Express + TypeScript'
+  });
+});
+
+// Handle 404 for API routes specifically
+app.use('/api/*', (req, res) => {
+  console.log('❌ API 404:', req.path);
+  res.status(404).json({ error: 'API endpoint not found', path: req.path });
+});
+
 // Serve React app for all non-API routes (production only)
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
+    console.log('📄 Serving React app for:', req.path);
     const indexPath = join(__dirname, '../dist/index.html');
-    console.log('📄 Serving index.html from:', indexPath);
+    console.log('📁 Index path:', indexPath);
     res.sendFile(indexPath);
   });
 }

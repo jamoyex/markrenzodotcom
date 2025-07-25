@@ -42,11 +42,11 @@ RUN ls -la dist/
 RUN ls -la server/
 
 # Expose port
-EXPOSE 3001
+EXPOSE 3005
 
 # Set environment
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=3005
 
 # Start the application
 CMD ["npm", "run", "start:prod"] 

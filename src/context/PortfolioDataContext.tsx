@@ -24,7 +24,7 @@ export const usePortfolioData = () => {
   return context;
 };
 
-const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3005/api';
 
 export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [portfolioData, setPortfolioData] = useState<PortfolioData>({});
@@ -38,12 +38,29 @@ export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({
         setError(null);
 
         // Get all available identifiers from the API
+        console.log('🔍 Fetching identifiers from:', `${API_BASE_URL}/identifiers`);
         const identifiersResponse = await fetch(`${API_BASE_URL}/identifiers`);
+        
+        console.log('📊 Identifiers response status:', identifiersResponse.status);
+        console.log('📊 Identifiers response headers:', identifiersResponse.headers.get('content-type'));
+        
         if (!identifiersResponse.ok) {
-          throw new Error('Failed to fetch identifiers');
+          const errorText = await identifiersResponse.text();
+          console.error('❌ Identifiers fetch failed:', errorText);
+          throw new Error(`Failed to fetch identifiers: ${identifiersResponse.status}`);
         }
         
-        const identifiersData = await identifiersResponse.json();
+        const responseText = await identifiersResponse.text();
+        console.log('📄 Raw response:', responseText.substring(0, 200) + '...');
+        
+        let identifiersData;
+        try {
+          identifiersData = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('❌ JSON Parse Error:', parseError);
+          console.error('📄 Response that failed to parse:', responseText);
+          throw new Error('Server returned invalid JSON');
+        }
         
         // Flatten the categorized response into a single array
         const identifiers: string[] = [];

@@ -5,7 +5,7 @@
 ### ⚡ **Critical Variables (REQUIRED)**
 ```bash
 NODE_ENV=production
-PORT=3001
+PORT=3005
 
 # Database Configuration (PostgreSQL)
 DB_HOST=your-database-host.com
@@ -25,7 +25,7 @@ Set these in your Coolify application environment:
 - `DB_USER` - Database username
 - `DB_PASSWORD` - Database password
 - `NODE_ENV` - Set to `production`
-- `PORT` - Set to `3001`
+- `PORT` - Set to `3005`
 
 ### 2. **Database Setup**
 Before first deployment, run:
@@ -36,14 +36,14 @@ npm run db:setup
 ### 3. **Build Configuration**
 - **Build Command**: `npm run build`
 - **Start Command**: `npm run start:prod`
-- **Port**: `3001`
+- **Port**: `3005`
 - **Health Check**: `/api/health`
 
 ### 4. **Container Configuration**
 - Uses multi-stage Docker build
 - Production dependencies only in final image
-- Serves React app + API server on port 3001
-- **IMPORTANT**: Server binds to `0.0.0.0:3001` (required for containers)
+- Serves React app + API server on port 3005
+- **IMPORTANT**: Server binds to `0.0.0.0:3005` (required for containers)
 
 ## ✅ **Health Check**
 The application provides a health check endpoint at:
@@ -60,7 +60,7 @@ GET /api/health
 1. Check Coolify container logs for startup errors
 2. Verify all environment variables are set
 3. Ensure database connectivity (app will run without DB but with fallbacks)
-4. Check if port 3001 is properly exposed
+4. Check if port 3005 is properly exposed
 
 **✅ App Features**: 
 - Comprehensive startup logging
@@ -96,10 +96,10 @@ GET /api/health
 # In Coolify, check the container logs for:
 🚀 Starting Mark Renzo Portfolio Server...
 📊 Environment: production
-🌐 Port: 3001
+🌐 Port: 3005
 📁 Serving static files from: /app/dist
 ✅ Database functions loaded successfully
-🚀 API Server running on http://0.0.0.0:3001
+🚀 API Server running on http://0.0.0.0:3005
 ✅ Server startup complete!
 ```
 
@@ -111,7 +111,7 @@ curl https://your-domain.com/api/health
   "status": "OK",
   "message": "API server is running",
   "environment": "production",
-  "port": 3001,
+  "port": 3005,
   "database": "loaded" // or "fallback"
 }
 ```
