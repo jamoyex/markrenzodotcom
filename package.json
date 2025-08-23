@@ -8,19 +8,22 @@
     "server": "npx tsx server/index.ts",
     "dev:full": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "tsc -b && vite build",
-
     "start:prod": "NODE_ENV=production npx tsx server/index.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "db:setup": "npx tsx scripts/setup-database.ts",
     "db:test": "npx tsx -e \"import('./src/lib/database.ts').then(db => db.testConnection().then(() => process.exit(0)))\"",
-
-    "db:reset": "npm run db:setup"
+    "db:reset": "npm run db:setup",
+    "db:seed": "npx tsx scripts/reset-and-seed.ts",
+    "db:import:slides": "npx tsx scripts/scrape-slides-projects.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.873.0",
+    "@aws-sdk/s3-request-presigner": "^3.873.0",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-slot": "^1.0.2",
     "@types/pg": "^8.15.4",
+    "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^4.18.2",

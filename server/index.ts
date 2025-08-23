@@ -4,6 +4,9 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { logger, createSafeErrorResponse } from '../src/lib/logger.ts';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { pool } from '../src/lib/database.ts';
 
 // Load environment variables
 dotenv.config();
@@ -28,12 +31,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// Serve static files in production
+// Static files
 if (process.env.NODE_ENV === 'production') {
   const distPath = join(__dirname, '../dist');
   logger.info('📁 Serving static files from:', distPath);
   app.use(express.static(distPath));
 }
+
+// Admin UI is handled by the Vite app at /admin (port 5173 in dev, SPA route in prod)
 
 // Import database functions with error handling
 let dbFunctionsAvailable = false;
@@ -52,6 +57,145 @@ try {
 }
 
 // API Routes
+// --- Admin auth middleware ---
+function adminAuth(req: any, res: any, next: any) {
+  const key = req.header('x-admin-key') || req.query.admin_key;
+  if (!process.env.ADMIN_PASSWORD) return res.status(500).json({ error: 'ADMIN_PASSWORD not set' });
+  if (key !== process.env.ADMIN_PASSWORD) return res.status(401).json({ error: 'Unauthorized' });
+  return next();
+}
+
+// Cloudflare R2 presign upload URL
+app.post('/api/admin/r2/presign', adminAuth, async (req, res) => {
+  try {
+    const { key, contentType } = req.body || {};
+    if (!key) return res.status(400).json({ error: 'key required' });
+    const r2 = new S3Client({
+      region: process.env.R2_REGION || 'auto',
+      endpoint: process.env.R2_ENDPOINT, // e.g. https://<accountid>.r2.cloudflarestorage.com
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+      },
+    });
+    const bucket = process.env.R2_BUCKET as string;
+    if (!bucket) return res.status(500).json({ error: 'R2_BUCKET not set' });
+    const cmd = new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: contentType || 'application/octet-stream' });
+    const url = await getSignedUrl(r2, cmd, { expiresIn: 60 * 5 });
+    const pubBase = process.env.R2_PUBLIC_BASE_URL;
+    const publicUrl = pubBase ? `${pubBase.replace(/\/$/, '')}/${key}` : null;
+    res.json({ url, key, publicUrl });
+  } catch (error) {
+    logger.error('R2 presign error:', error);
+    res.status(500).json(createSafeErrorResponse('Presign failed', error));
+  }
+});
+// --- Simple Admin Endpoints (minimal, whitelisted) ---
+const ADMIN_TABLES: Record<string, { editable: string[]; orderBy?: string }> = {
+  work_experience: {
+    editable: ['identifier','ai_description','company_name','position_title','employment_type','location','start_date','end_date','is_current','description','achievements','company_logo_url','company_website','display_order','is_active'],
+    orderBy: 'display_order DESC NULLS LAST, start_date DESC NULLS LAST, id DESC'
+  },
+  projects: {
+    editable: ['identifier','ai_description','title','slug','short_description','full_description','project_type','status','github_url','live_demo_url','featured_image_url','tech_stack','start_date','end_date','is_featured','display_order','is_active'],
+    orderBy: 'display_order DESC NULLS LAST, start_date DESC NULLS LAST, id DESC'
+  },
+  tools: {
+    editable: ['identifier','ai_description','name','category','description','icon_url','website_url','proficiency_level','years_experience','is_featured','display_order','is_active'],
+    orderBy: 'display_order DESC NULLS LAST, name ASC, id DESC'
+  },
+  skills: {
+    editable: ['identifier','ai_description','name','category','description','proficiency_percentage','skill_type','is_featured','display_order','is_active'],
+    orderBy: 'display_order DESC NULLS LAST, proficiency_percentage DESC, id DESC'
+  },
+  gallery: {
+    editable: ['identifier','ai_description','title','description','image_url','alt_text','category','metadata','project_id','is_featured','display_order','is_active'],
+    orderBy: 'display_order DESC NULLS LAST, created_at DESC NULLS LAST, id DESC'
+  }
+};
+
+function isValidTable(name: string): name is keyof typeof ADMIN_TABLES {
+  return Object.prototype.hasOwnProperty.call(ADMIN_TABLES, name);
+}
+
+app.get('/api/admin/:table', adminAuth, async (req, res) => {
+  try {
+    const { table } = req.params as { table: string };
+    if (!isValidTable(table)) return res.status(400).json({ error: 'Invalid table' });
+    if (!pool) return res.status(500).json({ error: 'DB unavailable' });
+    const orderBy = ADMIN_TABLES[table].orderBy || 'id DESC';
+    const client = await pool.connect();
+    const { rows } = await client.query(`SELECT * FROM ${table} ORDER BY ${orderBy} LIMIT 200`);
+    client.release();
+    res.json(rows);
+  } catch (error) {
+    logger.error('Admin GET error:', error);
+    res.status(500).json(createSafeErrorResponse('Admin fetch failed', error));
+  }
+});
+
+app.post('/api/admin/:table', adminAuth, async (req, res) => {
+  try {
+    const { table } = req.params as { table: string };
+    if (!isValidTable(table)) return res.status(400).json({ error: 'Invalid table' });
+    if (!pool) return res.status(500).json({ error: 'DB unavailable' });
+    const body = req.body || {};
+    const allowed = ADMIN_TABLES[table].editable;
+    const keys = Object.keys(body).filter(k => allowed.includes(k));
+    if (keys.length === 0) return res.status(400).json({ error: 'No valid fields' });
+    const cols = keys.join(', ');
+    const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
+    const values = keys.map(k => body[k]);
+    // Upsert by identifier if present, otherwise insert
+    const conflictTarget = keys.includes('identifier') ? 'identifier' : 'id';
+    const updateSet = keys.map((k, i) => `${k} = EXCLUDED.${k}`).join(', ');
+    const client = await pool.connect();
+    const sql = `INSERT INTO ${table} (${cols}) VALUES (${placeholders}) ON CONFLICT (${conflictTarget}) DO UPDATE SET ${updateSet} RETURNING *`;
+    const { rows } = await client.query(sql, values);
+    client.release();
+    res.json(rows[0]);
+  } catch (error) {
+    logger.error('Admin POST error:', error);
+    res.status(500).json(createSafeErrorResponse('Admin save failed', error));
+  }
+});
+
+app.put('/api/admin/:table/:id', adminAuth, async (req, res) => {
+  try {
+    const { table, id } = req.params as { table: string; id: string };
+    if (!isValidTable(table)) return res.status(400).json({ error: 'Invalid table' });
+    if (!pool) return res.status(500).json({ error: 'DB unavailable' });
+    const body = req.body || {};
+    const allowed = ADMIN_TABLES[table].editable;
+    const keys = Object.keys(body).filter(k => allowed.includes(k));
+    if (keys.length === 0) return res.status(400).json({ error: 'No valid fields' });
+    const setSql = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
+    const values = keys.map(k => body[k]);
+    values.push(Number(id));
+    const client = await pool.connect();
+    const { rows } = await client.query(`UPDATE ${table} SET ${setSql} WHERE id = $${keys.length + 1} RETURNING *`, values);
+    client.release();
+    res.json(rows[0]);
+  } catch (error) {
+    logger.error('Admin PUT error:', error);
+    res.status(500).json(createSafeErrorResponse('Admin update failed', error));
+  }
+});
+
+app.delete('/api/admin/:table/:id', adminAuth, async (req, res) => {
+  try {
+    const { table, id } = req.params as { table: string; id: string };
+    if (!isValidTable(table)) return res.status(400).json({ error: 'Invalid table' });
+    if (!pool) return res.status(500).json({ error: 'DB unavailable' });
+    const client = await pool.connect();
+    await client.query(`DELETE FROM ${table} WHERE id = $1`, [Number(id)]);
+    client.release();
+    res.json({ ok: true });
+  } catch (error) {
+    logger.error('Admin DELETE error:', error);
+    res.status(500).json(createSafeErrorResponse('Admin delete failed', error));
+  }
+});
 app.get('/api/portfolio/:identifier', async (req, res) => {
   logger.debug('API Request: /api/portfolio/' + req.params.identifier);
   try {
