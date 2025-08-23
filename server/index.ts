@@ -22,8 +22,18 @@ const app = express();
 const port = parseInt(process.env.PORT || '3005', 10);
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: true,
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','x-admin-key'],
+}));
+// Handle preflight for all routes
+app.options('*', cors({
+  origin: true,
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','x-admin-key'],
+}));
+app.use(express.json({ limit: '50mb' }));
 
 // Debug middleware to log all requests
 app.use((req, res, next) => {
@@ -88,6 +98,32 @@ app.post('/api/admin/r2/presign', adminAuth, async (req, res) => {
   } catch (error) {
     logger.error('R2 presign error:', error);
     res.status(500).json(createSafeErrorResponse('Presign failed', error));
+  }
+});
+
+// Direct upload proxy (avoids browser→R2 CORS). Body: { key, contentType, base64 }
+app.post('/api/admin/r2/upload', adminAuth, async (req, res) => {
+  try {
+    const { key, contentType, base64 } = req.body || {};
+    if (!key || !base64) return res.status(400).json({ error: 'key and base64 required' });
+    const r2 = new S3Client({
+      region: process.env.R2_REGION || 'auto',
+      endpoint: process.env.R2_ENDPOINT,
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+      },
+    });
+    const bucket = process.env.R2_BUCKET as string;
+    if (!bucket) return res.status(500).json({ error: 'R2_BUCKET not set' });
+    const buf = Buffer.from(base64, 'base64');
+    await r2.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: buf, ContentType: contentType || 'application/octet-stream' }));
+    const pubBase = process.env.R2_PUBLIC_BASE_URL;
+    const publicUrl = pubBase ? `${pubBase.replace(/\/$/, '')}/${key}` : null;
+    res.json({ ok: true, key, publicUrl });
+  } catch (error) {
+    logger.error('R2 upload error:', error);
+    res.status(500).json(createSafeErrorResponse('Upload failed', error));
   }
 });
 // --- Simple Admin Endpoints (minimal, whitelisted) ---

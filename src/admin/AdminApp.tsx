@@ -6,10 +6,10 @@ const DEV = import.meta.env.DEV
 const API_BASE = DEV ? 'http://localhost:3005/api' : '/api'
 
 function useAdminKey() {
-  const [key, setKey] = useState<string>(() => localStorage.getItem('admin_key') || '')
+  const [key, setKey] = useState<string>('')
   useEffect(() => {
-    localStorage.setItem('admin_key', key)
-  }, [key])
+    try { localStorage.removeItem('admin_key') } catch {}
+  }, [])
   return { key, setKey }
 }
 
@@ -24,6 +24,13 @@ async function jsonFetch<T>(url: string, opts: RequestInit = {}, adminKey?: stri
   })
   if (!res.ok) throw new Error(await res.text())
   return res.json()
+}
+
+function slugify(input: string): string {
+  return String(input || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '')
 }
 
 type FieldType = 'text' | 'textarea' | 'number' | 'checkbox' | 'date' | 'select' | 'image' | 'json-array'
@@ -161,9 +168,45 @@ export default function AdminApp() {
       if (f.type === 'json-array') v = Array.isArray(v) ? v : String(v).split(',').map(s=>s.trim()).filter(Boolean)
       body[f.key] = v
     })
-    await jsonFetch(url, { method, body: JSON.stringify(body) }, key)
-    setEditing(null)
-    await load()
+    // Auto-fill required fields the DB expects
+    if (table === 'gallery') {
+      if (!body.identifier && (editing.title || editing.identifier)) body.identifier = slugify(editing.identifier || editing.title)
+      if (!body.ai_description) body.ai_description = editing.description || editing.title || 'Gallery item'
+      if (!body.category) body.category = 'screenshot'
+      if (body.is_active === undefined) body.is_active = true
+    }
+    if (table === 'projects') {
+      if (!body.identifier && (editing.title || editing.identifier)) body.identifier = slugify(editing.identifier || editing.title)
+      if (!body.ai_description) body.ai_description = editing.short_description || editing.title || 'Project'
+      if (!body.project_type) body.project_type = 'web-app'
+      if (!body.status) body.status = 'completed'
+      if (body.is_active === undefined) body.is_active = true
+    }
+    if (table === 'work_experience') {
+      if (!body.identifier && (editing.company_name || editing.identifier)) body.identifier = slugify(editing.identifier || editing.company_name)
+      if (!body.ai_description) body.ai_description = `${editing.position_title || 'Role'} at ${editing.company_name || ''}`.trim()
+      if (body.is_active === undefined) body.is_active = true
+    }
+    if (table === 'tools') {
+      if (!body.identifier && (editing.name || editing.identifier)) body.identifier = slugify(editing.identifier || editing.name)
+      if (!body.ai_description) body.ai_description = `${editing.name || 'Tool'} tool`
+      if (!body.category) body.category = 'other'
+      if (!body.proficiency_level) body.proficiency_level = 'intermediate'
+      if (body.is_active === undefined) body.is_active = true
+    }
+    if (table === 'skills') {
+      if (!body.identifier && (editing.name || editing.identifier)) body.identifier = slugify(editing.identifier || editing.name)
+      if (!body.ai_description) body.ai_description = `${editing.name || 'Skill'}`
+      if (!body.category) body.category = 'technical'
+      if (body.is_active === undefined) body.is_active = true
+    }
+    try {
+      await jsonFetch(url, { method, body: JSON.stringify(body) }, key)
+      setEditing(null)
+      await load()
+    } catch (e: any) {
+      alert(`Save failed: ${e.message || e}`)
+    }
   }
 
   const onDelete = async (id: number) => {
@@ -180,18 +223,34 @@ export default function AdminApp() {
       i.click()
     })
 
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const res = String(reader.result || '')
+        const base64 = res.includes(',') ? res.split(',')[1] : res
+        resolve(base64)
+      }
+      reader.onerror = () => reject(reader.error)
+      reader.readAsDataURL(file)
+    })
+
   const onUpload = async (targetField: string) => {
-    const file = await pickFile()
-    if (!file || !editing) return
-    const keyPath = `${table}/${Date.now()}-${file.name}`
-    const pres = await jsonFetch<{ url: string; publicUrl?: string }>(
-      `${API_BASE}/admin/r2/presign`,
-      { method: 'POST', body: JSON.stringify({ key: keyPath, contentType: file.type }) },
-      key,
-    )
-    await fetch(pres.url, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file })
-    const publicUrl = pres.publicUrl || keyPath
-    setEditing({ ...editing, [targetField]: publicUrl })
+    try {
+      const file = await pickFile()
+      if (!file || !editing) return
+      const keyPath = `${table}/${Date.now()}-${file.name}`
+      // Use server proxy to avoid R2 CORS
+      const base64 = await fileToBase64(file)
+      const up = await jsonFetch<{ ok: boolean; publicUrl?: string }>(
+        `${API_BASE}/admin/r2/upload`,
+        { method: 'POST', body: JSON.stringify({ key: keyPath, contentType: file.type, base64 }) },
+        key,
+      )
+      setEditing({ ...editing, [targetField]: up.publicUrl || keyPath })
+    } catch (e: any) {
+      alert(`Upload failed (check Admin Key and env): ${e?.message || e}`)
+    }
   }
 
   const cfg = tableConfigs[table]
@@ -209,11 +268,16 @@ export default function AdminApp() {
       <aside style={{ padding: 16, borderRight: '1px solid #222' }}>
         <h3 style={{ marginTop: 0 }}>Admin</h3>
         <div style={{ display: 'grid', gap: 8 }}>
-          <input
-            value={key}
-            onChange={(e) => setKey(e.target.value)}
-            placeholder="Admin Key (ADMIN_PASSWORD)"
-          />
+          <label style={{ display: 'grid', gap: 4 }}>
+            Admin Key
+            <input
+              type="password"
+              value={key}
+              onChange={(e) => setKey(e.target.value)}
+              placeholder="Enter password"
+              autoComplete="off"
+            />
+          </label>
           {TABLES.map((t) => (
             <button key={t} onClick={() => setTable(t)} style={{ textAlign: 'left', padding: 8, background: t===table? '#222':'#181818', border: '1px solid #333', borderRadius: 8 }}>
               {t}
