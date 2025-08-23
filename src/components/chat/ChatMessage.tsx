@@ -8,11 +8,25 @@ interface ChatMessageProps {
   message: Message;
 }
 
+// Turn markdown links and raw URLs into clickable anchors
+const linkify = (text: string) => {
+  let result = text;
+  // Markdown links [label](url)
+  result = result.replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, (_m, label, url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+  });
+  // Raw URLs
+  result = result.replace(/(?<![\"'=])(https?:\/\/[^\s)]+)(?![^<]*?>)/g, (url) => {
+    return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+  });
+  return result;
+};
+
 const formatMessage = (text: string) => {
-  // Convert newlines to <br />
+  // Convert newlines to <br /> and bold to <strong>, then linkify
   let formatted = text.replace(/\n/g, '<br />');
-  // Convert **text** to <strong>text</strong>
   formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  formatted = linkify(formatted);
   return formatted;
 };
 
@@ -104,30 +118,51 @@ const formatBotMessage = (text: string) => {
     cumulativeDelay += totalAnimationTime + 0.3; // +0.3s pause between paragraphs
   });
   
-  return allLines.map((lineData, index) => (
-    <motion.div
-      key={index}
-      style={{ 
-        marginBottom: index < allLines.length - 1 ? '20px' : '0',
-        lineHeight: '1.6'
-      }}
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }}
-    >
-      <BlurText
-        text={lineData.text}
-        delay={lineData.delay}
-        animateBy="words"
-        duration={0.6}
-        style={{
-          fontSize: '15px',
-          color: 'rgba(255, 255, 255, 0.95)',
-          wordSpacing: '0.05em',
-          letterSpacing: '0.01em'
+  return allLines.map((lineData, index) => {
+    const hasLink = /\[[^\]]+\]\(https?:\/\/[^)\s]+\)|https?:\/\/[^\s)]+/.test(lineData.text);
+    if (hasLink) {
+      // Render as HTML to preserve anchors
+      const html = linkify(lineData.text).replace(/\n/g, '<br />');
+      return (
+        <motion.div
+          key={index}
+          style={{ 
+            marginBottom: index < allLines.length - 1 ? '20px' : '0',
+            lineHeight: '1.6'
+          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: lineData.delay, duration: 0.3 }}
+          className="prose"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+      );
+    }
+    return (
+      <motion.div
+        key={index}
+        style={{ 
+          marginBottom: index < allLines.length - 1 ? '20px' : '0',
+          lineHeight: '1.6'
         }}
-      />
-    </motion.div>
-  ));
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 1 }}
+      >
+        <BlurText
+          text={lineData.text}
+          delay={lineData.delay}
+          animateBy="words"
+          duration={0.6}
+          style={{
+            fontSize: '15px',
+            color: 'rgba(255, 255, 255, 0.95)',
+            wordSpacing: '0.05em',
+            letterSpacing: '0.01em'
+          }}
+        />
+      </motion.div>
+    );
+  });
 };
 
 const CardCarousel = ({ cards }: { cards: string[] }) => {

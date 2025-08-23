@@ -9,74 +9,14 @@ import { heroImage } from '@/assets';
 
 function ChatInterface() {
   const { messages, isTyping, sendMessage } = useChat();
-  const { isLoading: portfolioLoading, error: portfolioError } = usePortfolioData();
+  // Preload portfolio data in background; no need to use the values here
+  usePortfolioData();
   const [inputValue, setInputValue] = useState('');
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const hasMessages = messages.length > 0;
 
-  // Show loading indicator while portfolio data is being preloaded
-  if (portfolioLoading) {
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        flexDirection: 'column',
-        gap: '16px',
-        color: 'white'
-      }}>
-        <div style={{
-          width: '40px',
-          height: '40px',
-          border: '3px solid rgba(255, 255, 255, 0.3)',
-          borderTop: '3px solid white',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite'
-        }} />
-        <p>Loading portfolio data...</p>
-        <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  // Show error if portfolio data failed to load
-  if (portfolioError) {
-    return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        height: '100vh',
-        flexDirection: 'column',
-        gap: '16px',
-        color: 'white',
-        textAlign: 'center'
-      }}>
-        <p>⚠️ Failed to load portfolio data</p>
-        <p style={{ fontSize: '14px', opacity: 0.7 }}>{portfolioError}</p>
-        <button 
-          onClick={() => window.location.reload()} 
-          style={{
-            padding: '8px 16px',
-            background: 'rgba(255, 255, 255, 0.2)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            borderRadius: '8px',
-            color: 'white',
-            cursor: 'pointer'
-          }}
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  // Non-blocking preload: we do NOT early-return here.
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -222,13 +162,6 @@ function ChatInterface() {
                 <button
                   type="button"
                   className="input-action-btn"
-                  onClick={() => handleSuggestionClick('👔 What I’ve been up to')}
-                >
-                  👔 What I’ve been up to
-                </button>
-                <button
-                  type="button"
-                  className="input-action-btn"
                   onClick={() => handleSuggestionClick('🚀 Cool stuff I built')}
                 >
                   🚀 Cool stuff I built
@@ -236,16 +169,23 @@ function ChatInterface() {
                 <button
                   type="button"
                   className="input-action-btn"
-                  onClick={() => handleSuggestionClick('🛠️ My secret weapons')}
+                  onClick={() => handleSuggestionClick('🤖 Superpowers I flex')}
                 >
-                  🛠️ My secret weapons
+                  🤖 Superpowers I flex
                 </button>
                 <button
                   type="button"
                   className="input-action-btn"
-                  onClick={() => handleSuggestionClick('🤖 Superpowers I flex')}
+                  onClick={() => handleSuggestionClick('👔 What I’ve been up to')}
                 >
-                  🤖 Superpowers I flex
+                  👔 What I’ve been up to
+                </button>
+                <button
+                  type="button"
+                  className="input-action-btn"
+                  onClick={() => handleSuggestionClick('🛠️ My secret weapons')}
+                >
+                  🛠️ My secret weapons
                 </button>
                 <button
                   type="button"

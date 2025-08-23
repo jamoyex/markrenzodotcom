@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 interface ProjectData {
   id: number;
@@ -18,6 +20,30 @@ interface ProjectCardProps {
 }
 
 export default function ProjectCard({ data }: ProjectCardProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalUrl, setModalUrl] = useState<string | null>(null);
+
+  const openModal = (url: string) => {
+    setModalUrl(url);
+    setIsModalOpen(true);
+    try { document.body.style.overflow = 'hidden'; } catch {}
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalUrl(null);
+    try { document.body.style.overflow = ''; } catch {}
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    if (isModalOpen) window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isModalOpen]);
+
+  const isImageUrl = (url: string) => /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(url);
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'rgba(34, 197, 94, 0.8)';
@@ -136,10 +162,9 @@ export default function ProjectCard({ data }: ProjectCardProps) {
 
           <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             {data.live_demo_url && (
-              <a
-                href={data.live_demo_url}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => openModal(data.live_demo_url!)}
+                type="button"
                 style={{
                   padding: '6px 12px',
                   borderRadius: '8px',
@@ -149,11 +174,12 @@ export default function ProjectCard({ data }: ProjectCardProps) {
                   color: 'rgba(100, 200, 255, 0.9)',
                   textDecoration: 'none',
                   border: '1px solid rgba(100, 200, 255, 0.3)',
-                  transition: 'all 0.2s ease'
+                  transition: 'all 0.2s ease',
+                  cursor: 'pointer'
                 }}
               >
-                🚀 Live Demo
-              </a>
+                🚀 View Project
+              </button>
             )}
             {data.github_url && (
               <a
@@ -178,6 +204,110 @@ export default function ProjectCard({ data }: ProjectCardProps) {
           </div>
         </div>
       </div>
+      {isModalOpen && createPortal(
+        <div
+          role="dialog"
+          aria-modal="true"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) closeModal();
+          }}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0, 0, 0, 0.8)',
+            zIndex: 10000,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '24px'
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: 'min(1200px, 95vw)',
+              height: 'min(82vh, 85vh)',
+              background: 'rgba(12,12,12,0.98)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              overflow: 'hidden',
+              boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+            }}
+          >
+            <button
+              onClick={closeModal}
+              aria-label="Close"
+              type="button"
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                padding: '6px 10px',
+                borderRadius: '8px',
+                background: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                color: '#fff',
+                cursor: 'pointer',
+                zIndex: 1
+              }}
+            >
+              ✕
+            </button>
+            {modalUrl && (
+              isImageUrl(modalUrl) ? (
+                <img
+                  src={modalUrl}
+                  alt={data.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#111' }}
+                />
+              ) : (
+                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                  <iframe
+                    src={modalUrl}
+                    title={`${data.title} — Preview`}
+                    style={{ width: '100%', height: '100%', border: 'none', background: '#111' }}
+                    loading="eager"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      padding: '8px 12px',
+                      background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.7) 100%)',
+                      display: 'flex',
+                      gap: '10px',
+                      justifyContent: 'flex-end'
+                    }}
+                  >
+                    <a
+                      href={modalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        background: 'rgba(255,255,255,0.1)',
+                        color: '#fff',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        textDecoration: 'none'
+                      }}
+                    >
+                      Open in new tab
+                    </a>
+                  </div>
+                </div>
+              )
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
     </motion.div>
   );
 } 

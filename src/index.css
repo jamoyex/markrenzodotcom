@@ -97,7 +97,12 @@ body {
   flex-direction: column;
   position: relative;
   z-index: 10;
-  pointer-events: all;
+  pointer-events: none;
+}
+
+/* Enable interactions once conversation starts */
+#app-container.conversation-started {
+  pointer-events: auto;
 }
 
 #app-container #input-container {
@@ -163,6 +168,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 2;
+  pointer-events: auto;
 }
 
 .hero-container {
@@ -295,6 +301,8 @@ body {
   justify-content: flex-end;
   margin-top: 0;
   animation: fadeUp 0.6s ease-out 2.0s both;
+  position: relative;
+  z-index: 10;
 }
 
 .social-icon {
@@ -310,6 +318,9 @@ body {
   color: white;
   text-decoration: none;
   transition: all 0.3s ease;
+  pointer-events: auto;
+  position: relative;
+  z-index: 11;
 }
 
 .social-icon:hover {

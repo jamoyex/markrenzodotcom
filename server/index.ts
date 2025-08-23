@@ -75,6 +75,94 @@ function adminAuth(req: any, res: any, next: any) {
   return next();
 }
 
+// --- Helpers to coerce incoming admin payloads ---
+function toIsoDate(value: any): string | null {
+  if (!value) return null;
+  if (value instanceof Date && !isNaN(value.valueOf())) return value.toISOString().slice(0, 10);
+  const str = String(value).trim();
+  if (!str) return null;
+  // Accept mm/dd/yyyy
+  const m = str.match(/^([0-9]{1,2})\/([0-9]{1,2})\/([0-9]{4})$/);
+  if (m) {
+    const mm = m[1].padStart(2, '0');
+    const dd = m[2].padStart(2, '0');
+    const yyyy = m[3];
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  // Accept yyyy-mm-dd already
+  if (/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(str)) return str;
+  const d = new Date(str);
+  return isNaN(d.valueOf()) ? null : d.toISOString().slice(0, 10);
+}
+
+function normalizeAdminInput(table: string, rawBody: any, allowed: string[]) {
+  const body: Record<string, any> = {};
+  // Only keep allowed keys and coerce common types
+  for (const key of allowed) {
+    if (!(key in rawBody)) continue;
+    let value = rawBody[key];
+
+    // Empty strings -> null
+    if (typeof value === 'string' && value.trim() === '') {
+      value = null;
+    }
+
+    // Booleans from checkbox/text
+    if (['is_active','is_featured','is_current'].includes(key)) {
+      if (typeof value === 'string') value = ['true','1','on','yes'].includes(value.toLowerCase());
+      value = Boolean(value);
+    }
+
+    // Numbers
+    if (['display_order','years_experience','project_id'].includes(key)) {
+      value = value === null ? null : Number(value);
+    }
+
+    // Dates
+    if (['start_date','end_date'].includes(key)) {
+      value = toIsoDate(value);
+    }
+
+    body[key] = value;
+  }
+
+  // Table-specific coercions
+  if (table === 'projects') {
+    if ('tech_stack' in rawBody) {
+      const v = rawBody.tech_stack;
+      if (Array.isArray(v)) {
+        body.tech_stack = v;
+      } else if (typeof v === 'string') {
+        const arr = v.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+        body.tech_stack = arr.length ? arr : null;
+      } else if (v == null) {
+        body.tech_stack = null;
+      }
+    }
+  }
+
+  if (table === 'gallery') {
+    if ('metadata' in rawBody) {
+      const v = rawBody.metadata;
+      if (typeof v === 'string') {
+        const trimmed = v.trim();
+        if (!trimmed) {
+          body.metadata = null;
+        } else {
+          try {
+            body.metadata = JSON.parse(trimmed);
+          } catch {
+            // Fallback: store as simple text field inside a JSON object
+            body.metadata = { note: trimmed };
+          }
+        }
+      }
+    }
+  }
+
+  return body;
+}
+
 // Cloudflare R2 presign upload URL
 app.post('/api/admin/r2/presign', adminAuth, async (req, res) => {
   try {
@@ -170,18 +258,32 @@ app.get('/api/admin/:table', adminAuth, async (req, res) => {
   }
 });
 
+// JSONB fields per table for correct casting/stringification
+const JSONB_FIELDS: Record<string, Set<string>> = {
+  projects: new Set(['tech_stack']),
+  gallery: new Set(['metadata'])
+};
+
 app.post('/api/admin/:table', adminAuth, async (req, res) => {
   try {
     const { table } = req.params as { table: string };
     if (!isValidTable(table)) return res.status(400).json({ error: 'Invalid table' });
     if (!pool) return res.status(500).json({ error: 'DB unavailable' });
-    const body = req.body || {};
     const allowed = ADMIN_TABLES[table].editable;
+    const body = normalizeAdminInput(table, req.body || {}, allowed);
     const keys = Object.keys(body).filter(k => allowed.includes(k));
     if (keys.length === 0) return res.status(400).json({ error: 'No valid fields' });
     const cols = keys.join(', ');
-    const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
-    const values = keys.map(k => body[k]);
+    const placeholders = keys
+      .map((k, i) => `$${i + 1}${JSONB_FIELDS[table]?.has(k) ? '::jsonb' : ''}`)
+      .join(', ');
+    const values = keys.map(k => {
+      if (JSONB_FIELDS[table]?.has(k)) {
+        const v = body[k];
+        return v == null ? null : (typeof v === 'string' ? v : JSON.stringify(v));
+      }
+      return body[k];
+    });
     // Upsert by identifier if present, otherwise insert
     const conflictTarget = keys.includes('identifier') ? 'identifier' : 'id';
     const updateSet = keys.map((k, i) => `${k} = EXCLUDED.${k}`).join(', ');
@@ -201,12 +303,20 @@ app.put('/api/admin/:table/:id', adminAuth, async (req, res) => {
     const { table, id } = req.params as { table: string; id: string };
     if (!isValidTable(table)) return res.status(400).json({ error: 'Invalid table' });
     if (!pool) return res.status(500).json({ error: 'DB unavailable' });
-    const body = req.body || {};
     const allowed = ADMIN_TABLES[table].editable;
+    const body = normalizeAdminInput(table, req.body || {}, allowed);
     const keys = Object.keys(body).filter(k => allowed.includes(k));
     if (keys.length === 0) return res.status(400).json({ error: 'No valid fields' });
-    const setSql = keys.map((k, i) => `${k} = $${i + 1}`).join(', ');
-    const values = keys.map(k => body[k]);
+    const setSql = keys
+      .map((k, i) => `${k} = $${i + 1}${JSONB_FIELDS[table]?.has(k) ? '::jsonb' : ''}`)
+      .join(', ');
+    const values = keys.map(k => {
+      if (JSONB_FIELDS[table]?.has(k)) {
+        const v = body[k];
+        return v == null ? null : (typeof v === 'string' ? v : JSON.stringify(v));
+      }
+      return body[k];
+    });
     values.push(Number(id));
     const client = await pool.connect();
     const { rows } = await client.query(`UPDATE ${table} SET ${setSql} WHERE id = $${keys.length + 1} RETURNING *`, values);
