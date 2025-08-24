@@ -6,6 +6,7 @@ import { PortfolioDataProvider, usePortfolioData } from './context/PortfolioData
 import BlurText from './components/ui/BlurText';
 import SplashCursor from './components/ui/SplashCursor';
 import { heroImage } from '@/assets';
+import IframeLightbox from './components/ui/IframeLightbox';
 
 function ChatInterface() {
   const { messages, isTyping, sendMessage } = useChat();
@@ -240,6 +241,7 @@ export default function App() {
           SIM_RESOLUTION={64}           // Lower simulation resolution for smoother performance
         />
         <ChatInterface />
+        <IframeLightbox />
       </ChatProvider>
     </PortfolioDataProvider>
   );

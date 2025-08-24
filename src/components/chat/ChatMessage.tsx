@@ -436,6 +436,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
 
   // Check if this is a carousel message
   const hasCarousel = !isUser && content.includes('[') && content.includes(']');
+  const isFullWidthAssistant = !isUser && (hasCarousel || content.includes('<aboutmecard>'));
 
   const messageStyle = isUser ? {
     backgroundColor: 'rgba(52, 53, 65, 0.9)',
@@ -445,7 +446,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     width: 'fit-content'
   } : {
     color: 'var(--color-text-primary)',
-    width: hasCarousel ? '100%' : 'auto',
+    width: isFullWidthAssistant ? '100%' : 'auto',
     maxWidth: '100%'
   };
 
@@ -455,7 +456,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       style={{
         display: 'flex',
         padding: '20px 0',
-        justifyContent: isUser ? 'flex-end' : 'flex-start'
+        justifyContent: isUser ? 'flex-end' : (isFullWidthAssistant ? 'center' : 'flex-start')
       }}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}

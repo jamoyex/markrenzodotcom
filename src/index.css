@@ -939,7 +939,7 @@ body {
 }
 
 .message.assistant {
-  max-width: 90%;
+  max-width: 100%;
 }
 
 .message.assistant .bot-paragraph {
