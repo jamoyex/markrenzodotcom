@@ -44,23 +44,49 @@ export default function ProjectCard({ data }: ProjectCardProps) {
   }, [isModalOpen]);
 
   const isImageUrl = (url: string) => /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(url);
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed': return 'rgba(34, 197, 94, 0.8)';
-      case 'in-progress': return 'rgba(234, 179, 8, 0.8)';
-      case 'planning': return 'rgba(168, 85, 247, 0.8)';
-      case 'archived': return 'rgba(156, 163, 175, 0.8)';
-      default: return 'rgba(156, 163, 175, 0.8)';
+  const TYPE_COLORS: Record<string, string> = {
+    'Creative Media': 'rgba(236, 72, 153, 0.85)', // pink
+    'AI Workflows': 'rgba(168, 85, 247, 0.85)',   // purple
+    'Chatbots': 'rgba(59, 130, 246, 0.85)',       // blue
+    'Web Design': 'rgba(20, 184, 166, 0.85)',     // teal
+    'Web App': 'rgba(99, 102, 241, 0.85)',        // indigo
+    'Mobile App': 'rgba(16, 185, 129, 0.85)',     // emerald
+    'SAAS': 'rgba(234, 179, 8, 0.85)',            // amber
+    'Automation': 'rgba(234, 88, 12, 0.85)',      // orange
+  };
+
+  const TYPE_PALETTE = [
+    'rgba(59, 130, 246, 0.8)',
+    'rgba(16, 185, 129, 0.8)',
+    'rgba(234, 88, 12, 0.8)',
+    'rgba(168, 85, 247, 0.8)',
+    'rgba(234, 179, 8, 0.8)',
+    'rgba(236, 72, 153, 0.8)',
+    'rgba(99, 102, 241, 0.8)',
+    'rgba(20, 184, 166, 0.8)',
+  ];
+
+  const getTypeColor = (type: string) => {
+    if (TYPE_COLORS[type]) return TYPE_COLORS[type];
+    let hash = 0;
+    for (let i = 0; i < type.length; i++) {
+      hash = type.charCodeAt(i) + ((hash << 5) - hash);
+      hash |= 0;
     }
+    const index = Math.abs(hash) % TYPE_PALETTE.length;
+    return TYPE_PALETTE[index];
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'web-app': return '🌐';
-      case 'mobile-app': return '📱';
-      case 'api': return '🔌';
-      case 'ai-project': return '🤖';
-      case 'tool': return '🛠️';
+      case 'Creative Media': return '🎨';
+      case 'AI Workflows': return '🤖';
+      case 'Chatbots': return '💬';
+      case 'Web Design': return '🌐';
+      case 'Web App': return '🧩';
+      case 'Mobile App': return '📱';
+      case 'SAAS': return '☁️';
+      case 'Automation': return '⚙️';
       default: return '💻';
     }
   };
@@ -113,10 +139,10 @@ export default function ProjectCard({ data }: ProjectCardProps) {
               fontSize: '11px',
               fontWeight: '500',
               textTransform: 'capitalize',
-              background: getStatusColor(data.status),
+              background: getTypeColor(data.project_type),
               color: 'white'
             }}>
-              {data.status.replace('-', ' ')}
+              {data.project_type.replace('-', ' ')}
             </div>
           </div>
 
@@ -267,7 +293,7 @@ export default function ProjectCard({ data }: ProjectCardProps) {
                     title={`${data.title} — Preview`}
                     style={{ width: '100%', height: '100%', border: 'none', background: '#111' }}
                     loading="eager"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allow="microphone; camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerPolicy="no-referrer-when-downgrade"
                   />
                   <div

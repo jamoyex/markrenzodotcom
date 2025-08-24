@@ -45,7 +45,7 @@ const tableConfigs: Record<TableName, { titleField: string; fields: Field[] }> =
       { key: 'slug', label: 'Slug', type: 'text' },
       { key: 'short_description', label: 'Short Description', type: 'textarea' },
       { key: 'full_description', label: 'Full Description', type: 'textarea' },
-      { key: 'project_type', label: 'Type', type: 'select', options: ['web-app','mobile-app','api','ai-project','tool','other'] },
+      { key: 'project_type', label: 'Type', type: 'select', options: ['Creative Media','AI Workflows','Chatbots','Web Design','Web App','Mobile App','SAAS','Automation'] },
       { key: 'status', label: 'Status', type: 'select', options: ['completed','in-progress','planning','archived'] },
       { key: 'github_url', label: 'GitHub', type: 'text' },
       { key: 'live_demo_url', label: 'Live Demo', type: 'text' },

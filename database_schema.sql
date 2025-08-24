@@ -32,7 +32,7 @@ CREATE TABLE projects (
     slug VARCHAR(255) UNIQUE NOT NULL,
     short_description TEXT,
     full_description TEXT,
-    project_type VARCHAR(20) DEFAULT 'web-app' CHECK (project_type IN ('web-app', 'mobile-app', 'api', 'ai-project', 'tool', 'other')),
+    project_type VARCHAR(40) DEFAULT 'Web Design' CHECK (project_type IN ('Creative Media','AI Workflows','Chatbots','Web Design','Web App','Mobile App','SAAS','Automation')),
     status VARCHAR(20) DEFAULT 'completed' CHECK (status IN ('completed', 'in-progress', 'planning', 'archived')),
     github_url VARCHAR(500),
     live_demo_url VARCHAR(500),
@@ -138,8 +138,8 @@ INSERT INTO work_experience (identifier, ai_description, company_name, position_
 ('work_freelance', 'My freelance work and consulting experience', 'Freelance', 'AI & Web Development Consultant', 'freelance', 'Remote', '2022-01-01', false, 'Helping businesses integrate AI solutions', 'Delivered 15+ AI projects for various clients');
 
 INSERT INTO projects (identifier, ai_description, title, slug, short_description, project_type, status, tech_stack, is_featured) VALUES
-('project_chatbot', 'My AI chatbot SaaS platform project', 'AI Chatbot SaaS', 'ai-chatbot-saas', 'Multi-tenant AI chatbot platform for businesses', 'ai-project', 'completed', '["React", "Node.js", "OpenAI", "PostgreSQL"]', true),
-('project_portfolio', 'This portfolio website project', 'Portfolio Website', 'portfolio-website', 'Modern portfolio with AI integration', 'web-app', 'in-progress', '["React", "TypeScript", "Tailwind"]', true);
+('project_chatbot', 'My AI chatbot SaaS platform project', 'AI Chatbot SaaS', 'ai-chatbot-saas', 'Multi-tenant AI chatbot platform for businesses', 'Chatbots', 'completed', '["React", "Node.js", "OpenAI", "PostgreSQL"]', true),
+('project_portfolio', 'This portfolio website project', 'Portfolio Website', 'portfolio-website', 'Modern portfolio with AI integration', 'Web Design', 'in-progress', '["React", "TypeScript", "Tailwind"]', true);
 
 INSERT INTO tools (identifier, ai_description, name, category, proficiency_level, years_experience, is_featured) VALUES
 ('tool_react', 'React.js framework for frontend development', 'React.js', 'frontend', 'expert', 4, true),
