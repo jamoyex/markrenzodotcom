@@ -6,6 +6,8 @@
   border-radius: 20px;
   background: transparent;
   cursor: pointer;
+  /* Allow vertical page scroll; prevent horizontal touch panning conflicts */
+  touch-action: pan-y;
 }
 
 .circular-gallery canvas {

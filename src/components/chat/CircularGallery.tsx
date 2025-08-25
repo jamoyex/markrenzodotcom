@@ -36,31 +36,61 @@ function createTextTexture(
   gl: GL,
   text: string,
   font: string = "bold 30px monospace",
-  color: string = "black"
-): { texture: Texture; width: number; height: number } {
+  color: string = "black",
+  maxWidth?: number
+): { texture: Texture; width: number; height: number; lineCount: number } {
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Could not get 2d context");
 
   context.font = font;
-  const metrics = context.measureText(text);
-  const textWidth = Math.ceil(metrics.width);
   const fontSize = getFontSize(font);
-  const textHeight = Math.ceil(fontSize * 1.2);
+  const lineHeight = Math.ceil(fontSize * 1.2);
+  let lines: string[] = [];
+  if (maxWidth && context.measureText(text).width > maxWidth) {
+    const words = text.split(/\s+/);
+    let current = "";
+    for (let i = 0; i < words.length; i++) {
+      const test = current ? current + " " + words[i] : words[i];
+      const w = context.measureText(test).width;
+      if (w > maxWidth && current) {
+        lines.push(current);
+        current = words[i];
+      } else {
+        current = test;
+      }
+    }
+    if (current) lines.push(current);
+  } else {
+    lines = [text];
+  }
 
-  canvas.width = textWidth + 20;
-  canvas.height = textHeight + 20;
+  const actualWidth = Math.ceil(
+    Math.min(
+      Math.max(...lines.map((l) => Math.ceil(context.measureText(l).width))),
+      maxWidth || Number.POSITIVE_INFINITY
+    )
+  );
+  const actualHeight = Math.ceil(lineHeight * lines.length);
+
+  canvas.width = actualWidth + 24;
+  canvas.height = actualHeight + 24;
 
   context.font = font;
   context.fillStyle = color;
-  context.textBaseline = "middle";
+  context.textBaseline = "top";
   context.textAlign = "center";
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.fillText(text, canvas.width / 2, canvas.height / 2);
+  const x = canvas.width / 2;
+  let y = 12; // top padding
+  for (let i = 0; i < lines.length; i++) {
+    context.fillText(lines[i], x, y);
+    y += lineHeight;
+  }
 
   const texture = new Texture(gl, { generateMipmaps: false });
   texture.image = canvas;
-  return { texture, width: canvas.width, height: canvas.height };
+  return { texture, width: canvas.width, height: canvas.height, lineCount: lines.length };
 }
 
 interface TitleProps {
@@ -71,6 +101,7 @@ interface TitleProps {
   text: string;
   textColor?: string;
   font?: string;
+  maxWidth?: number;
 }
 
 class Title {
@@ -83,8 +114,10 @@ class Title {
   font: string;
   mesh!: Mesh;
   aspect: number = 1;
+  maxWidth?: number;
+  lineCount: number = 1;
 
-  constructor({ gl, plane, renderer, scene, text, textColor = "#545050", font = "30px sans-serif" }: TitleProps) {
+  constructor({ gl, plane, renderer, scene, text, textColor = "#545050", font = "30px sans-serif", maxWidth }: TitleProps) {
     autoBind(this);
     this.gl = gl;
     this.plane = plane;
@@ -93,6 +126,7 @@ class Title {
     this.text = text;
     this.textColor = textColor;
     this.font = font;
+    this.maxWidth = maxWidth;
     // Create immediately to avoid undefined mesh during first frames
     this.createMesh();
     // Then try to load font and refresh texture to Montserrat once ready
@@ -110,7 +144,7 @@ class Title {
   }
 
   createMesh() {
-    const { texture, width, height } = createTextTexture(this.gl, this.text, this.font, this.textColor);
+    const { texture, width, height, lineCount } = createTextTexture(this.gl, this.text, this.font, this.textColor, this.maxWidth);
     const geometry = new Plane(this.gl);
     const program = new Program(this.gl, {
       vertex: `
@@ -139,10 +173,12 @@ class Title {
     });
     this.mesh = new Mesh(this.gl, { geometry, program });
     const aspect = width / height;
-    const textHeightScaled = this.plane.scale.y * 0.15;
-    const textWidthScaled = textHeightScaled * aspect;
-    this.mesh.scale.set(textWidthScaled, textHeightScaled, 1);
-    this.mesh.position.y = -this.plane.scale.y * 0.5 - textHeightScaled * 0.5 - 0.05;
+    this.lineCount = Math.max(1, lineCount || 1);
+    const singleLineHeight = this.plane.scale.y * 0.15;
+    const totalBlockHeight = singleLineHeight * this.lineCount;
+    const textWidthScaled = totalBlockHeight * aspect;
+    this.mesh.scale.set(textWidthScaled, totalBlockHeight, 1);
+    this.mesh.position.y = -this.plane.scale.y * 0.5 - totalBlockHeight * 0.5 - 0.05;
     // Do not parent to the scaled plane to avoid non-uniform scale distortion
     this.mesh.setParent(this.scene);
     this.aspect = aspect;
@@ -150,7 +186,7 @@ class Title {
 
   refreshTexture() {
     if (!this.mesh) return;
-    const { texture, width, height } = createTextTexture(this.gl, this.text, this.font, this.textColor);
+    const { texture, width, height, lineCount } = createTextTexture(this.gl, this.text, this.font, this.textColor, this.maxWidth);
     // Replace texture uniform
     const program = (this.mesh as any).program as Program;
     if (program && program.uniforms && program.uniforms.tMap) {
@@ -158,9 +194,11 @@ class Title {
     }
     const aspect = width / height;
     this.aspect = aspect;
-    const textHeightScaled = this.plane.scale.y * 0.15;
-    const textWidthScaled = textHeightScaled * aspect;
-    this.mesh.scale.set(textWidthScaled, textHeightScaled, 1);
+    this.lineCount = Math.max(1, lineCount || 1);
+    const singleLineHeight = this.plane.scale.y * 0.15;
+    const totalBlockHeight = singleLineHeight * this.lineCount;
+    const textWidthScaled = totalBlockHeight * aspect;
+    this.mesh.scale.set(textWidthScaled, totalBlockHeight, 1);
   }
 }
 
@@ -189,6 +227,7 @@ interface MediaProps {
   textColor: string;
   borderRadius?: number;
   font?: string;
+  titleMaxWidth?: number;
 }
 
 class Media {
@@ -209,6 +248,7 @@ class Media {
   textColor: string;
   borderRadius: number;
   font?: string;
+  titleMaxWidth?: number;
   program!: Program;
   plane!: Mesh;
   title!: Title;
@@ -238,6 +278,7 @@ class Media {
     textColor,
     borderRadius = 0,
     font,
+    titleMaxWidth,
   }: MediaProps) {
     this.geometry = geometry;
     this.gl = gl;
@@ -254,6 +295,7 @@ class Media {
     this.textColor = textColor;
     this.borderRadius = borderRadius;
     this.font = font;
+    this.titleMaxWidth = titleMaxWidth;
     this.createShader();
     this.createMesh();
     this.createTitle();
@@ -365,6 +407,7 @@ class Media {
       text: this.text,
       textColor: this.textColor,
       font: this.font,
+      maxWidth: this.titleMaxWidth ?? 420,
     });
   }
 
@@ -454,6 +497,10 @@ interface AppConfig {
   scrollSpeed?: number;
   scrollEase?: number;
   onItemClick?: (payload: { index: number; image: string; text: string }) => void;
+  enableWheel?: boolean;
+  autoplay?: boolean;
+  autoplaySpeed?: number;
+  titleMaxWidth?: number; // in canvas pixels
 }
 
 class App {
@@ -479,6 +526,11 @@ class App {
   viewport!: { width: number; height: number };
   raf: number = 0;
   onItemClick?: (payload: { index: number; image: string; text: string }) => void;
+  enableWheel: boolean = false;
+  autoplay: boolean = false;
+  autoplaySpeed: number = 0.25;
+  eventTargetEl?: HTMLElement;
+  titleMaxWidth?: number;
 
   boundOnResize!: () => void;
   boundOnWheel!: (e: Event) => void;
@@ -489,6 +541,8 @@ class App {
 
   isDown: boolean = false;
   start: number = 0;
+  dragDistance: number = 0;
+  dragThreshold: number = 6; // pixels before considering it a drag
 
   constructor(
     container: HTMLElement,
@@ -501,6 +555,10 @@ class App {
       scrollSpeed = 2,
       scrollEase = 0.05,
       onItemClick,
+      enableWheel = false,
+      autoplay = false,
+      autoplaySpeed = 0.25,
+      titleMaxWidth,
     }: AppConfig
   ) {
     document.documentElement.classList.remove("no-js");
@@ -508,6 +566,10 @@ class App {
     this.scrollSpeed = scrollSpeed;
     this.scroll = { ease: scrollEase, current: 0, target: 0, last: 0 };
     this.onItemClick = onItemClick;
+    this.enableWheel = enableWheel;
+    this.autoplay = autoplay;
+    this.autoplaySpeed = autoplaySpeed;
+    this.titleMaxWidth = titleMaxWidth;
     this.onCheckDebounce = debounce(this.onCheck.bind(this), 200);
     this.createRenderer();
     this.createCamera();
@@ -594,21 +656,26 @@ class App {
         textColor,
         borderRadius,
         font,
+        titleMaxWidth: this.titleMaxWidth,
       });
     });
   }
 
   onTouchDown(e: MouseEvent | TouchEvent) {
+    try { (e as any).preventDefault?.(); } catch {}
     this.isDown = true;
     this.scroll.position = this.scroll.current;
     this.start = "touches" in e ? e.touches[0].clientX : e.clientX;
+    this.dragDistance = 0;
   }
 
   onTouchMove(e: MouseEvent | TouchEvent) {
     if (!this.isDown) return;
+    try { (e as any).preventDefault?.(); } catch {}
     const x = "touches" in e ? e.touches[0].clientX : e.clientX;
     const distance = (this.start - x) * (this.scrollSpeed * 0.025);
     this.scroll.target = (this.scroll.position ?? 0) + distance;
+    this.dragDistance = Math.abs(this.start - x);
   }
 
   onTouchUp() {
@@ -650,6 +717,9 @@ class App {
   }
 
   update() {
+    if (this.autoplay && !this.isDown) {
+      this.scroll.target += this.autoplaySpeed;
+    }
     this.scroll.current = lerp(this.scroll.current, this.scroll.target, this.scroll.ease);
     const direction = this.scroll.current > this.scroll.last ? "right" : "left";
     if (this.medias) {
@@ -668,14 +738,24 @@ class App {
     this.boundOnTouchUp = this.onTouchUp.bind(this);
     this.boundOnClick = this.onClick.bind(this);
     window.addEventListener("resize", this.boundOnResize);
-    window.addEventListener("mousewheel", this.boundOnWheel);
-    window.addEventListener("wheel", this.boundOnWheel);
-    window.addEventListener("mousedown", this.boundOnTouchDown);
-    window.addEventListener("mousemove", this.boundOnTouchMove);
-    window.addEventListener("mouseup", this.boundOnTouchUp);
-    window.addEventListener("touchstart", this.boundOnTouchDown);
-    window.addEventListener("touchmove", this.boundOnTouchMove);
-    window.addEventListener("touchend", this.boundOnTouchUp);
+    if (this.enableWheel) {
+      window.addEventListener("mousewheel", this.boundOnWheel);
+      window.addEventListener("wheel", this.boundOnWheel);
+    }
+    const targetEl = (this.renderer && this.renderer.gl && this.renderer.gl.canvas)
+      ? (this.renderer.gl.canvas as HTMLCanvasElement)
+      : (this.container as HTMLElement);
+    this.eventTargetEl = targetEl as HTMLElement;
+    // Mouse events
+    targetEl.addEventListener("mousedown", this.boundOnTouchDown);
+    targetEl.addEventListener("mousemove", this.boundOnTouchMove);
+    targetEl.addEventListener("mouseup", this.boundOnTouchUp);
+    targetEl.addEventListener("mouseleave", this.boundOnTouchUp);
+    // Touch events (passive: false to allow preventDefault)
+    targetEl.addEventListener("touchstart", this.boundOnTouchDown as any, { passive: false } as any);
+    targetEl.addEventListener("touchmove", this.boundOnTouchMove as any, { passive: false } as any);
+    targetEl.addEventListener("touchend", this.boundOnTouchUp as any);
+    // Clicks for lightbox
     this.renderer.gl.canvas.addEventListener("click", this.boundOnClick);
     this.container.addEventListener("click", this.boundOnClick);
   }
@@ -683,14 +763,19 @@ class App {
   destroy() {
     window.cancelAnimationFrame(this.raf);
     window.removeEventListener("resize", this.boundOnResize);
-    window.removeEventListener("mousewheel", this.boundOnWheel);
-    window.removeEventListener("wheel", this.boundOnWheel);
-    window.removeEventListener("mousedown", this.boundOnTouchDown);
-    window.removeEventListener("mousemove", this.boundOnTouchMove);
-    window.removeEventListener("mouseup", this.boundOnTouchUp);
-    window.removeEventListener("touchstart", this.boundOnTouchDown);
-    window.removeEventListener("touchmove", this.boundOnTouchMove);
-    window.removeEventListener("touchend", this.boundOnTouchUp);
+    if (this.enableWheel) {
+      window.removeEventListener("mousewheel", this.boundOnWheel);
+      window.removeEventListener("wheel", this.boundOnWheel);
+    }
+    if (this.eventTargetEl) {
+      this.eventTargetEl.removeEventListener("mousedown", this.boundOnTouchDown);
+      this.eventTargetEl.removeEventListener("mousemove", this.boundOnTouchMove);
+      this.eventTargetEl.removeEventListener("mouseup", this.boundOnTouchUp);
+      this.eventTargetEl.removeEventListener("mouseleave", this.boundOnTouchUp);
+      this.eventTargetEl.removeEventListener("touchstart", this.boundOnTouchDown as any);
+      this.eventTargetEl.removeEventListener("touchmove", this.boundOnTouchMove as any);
+      this.eventTargetEl.removeEventListener("touchend", this.boundOnTouchUp as any);
+    }
     if (this.renderer && this.renderer.gl && this.renderer.gl.canvas) {
       this.renderer.gl.canvas.removeEventListener("click", this.boundOnClick);
     }
@@ -702,16 +787,26 @@ class App {
     }
   }
 
-  onClick(_e: MouseEvent) {
+  onClick(e: MouseEvent) {
     if (!this.medias || this.medias.length === 0) return;
-    // Pick the item whose plane is nearest to the viewport center (x = 0)
+    // If the user just dragged beyond threshold, do not treat as a click
+    if (this.dragDistance > this.dragThreshold) return;
+    // Map clientX to world X in viewport space
+    const canvasEl = (this.renderer && this.renderer.gl && this.renderer.gl.canvas)
+      ? (this.renderer.gl.canvas as HTMLCanvasElement)
+      : (this.container as HTMLElement);
+    const rect = canvasEl.getBoundingClientRect();
+    const px = e.clientX - rect.left;
+    const worldX = (px / rect.width) * this.viewport.width - (this.viewport.width / 2);
+    // Find media whose plane.x is closest to worldX
     let nearestIndex = 0;
-    let nearestAbs = Number.POSITIVE_INFINITY;
+    let nearestDiff = Number.POSITIVE_INFINITY;
     for (let i = 0; i < this.medias.length; i++) {
       const m = this.medias[i];
-      const absx = Math.abs((m.plane as any).position?.x ?? Number.POSITIVE_INFINITY);
-      if (absx < nearestAbs) {
-        nearestAbs = absx;
+      const planeX = (m.plane as any).position?.x ?? Number.POSITIVE_INFINITY;
+      const diff = Math.abs(planeX - worldX);
+      if (diff < nearestDiff) {
+        nearestDiff = diff;
         nearestIndex = i;
       }
     }
@@ -719,7 +814,6 @@ class App {
     const data = this.mediasImages[nearestIndex] || { href: '', text: '' } as any;
     const detail = { index: effectiveIndex, image: data.href, text: data.text };
     try {
-      console.log('[CircularGallery] click', detail);
       const evt = new CustomEvent('open-lightbox', { detail });
       window.dispatchEvent(evt);
     } catch {}
@@ -736,6 +830,10 @@ interface CircularGalleryProps {
   scrollSpeed?: number;
   scrollEase?: number;
   onItemClick?: (payload: { index: number; image: string; text: string }) => void;
+  enableWheel?: boolean;
+  autoplay?: boolean;
+  autoplaySpeed?: number;
+  titleMaxWidth?: number;
 }
 
 export default function CircularGallery({
@@ -747,11 +845,17 @@ export default function CircularGallery({
   scrollSpeed = 2,
   scrollEase = 0.05,
   onItemClick,
+  enableWheel = false,
+  autoplay = false,
+  autoplaySpeed = 0.25,
+  titleMaxWidth,
 }: CircularGalleryProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalUrl, setModalUrl] = useState<string | null>(null);
   const [modalTitle, setModalTitle] = useState<string>('');
+  const onItemClickRef = useRef<typeof onItemClick>();
+  onItemClickRef.current = onItemClick;
 
   const isImageUrl = (url: string) => /\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(url);
 
@@ -785,17 +889,22 @@ export default function CircularGallery({
       scrollSpeed,
       scrollEase,
       onItemClick: ({ image, text }) => {
-        if (onItemClick) {
-          onItemClick({ index: 0, image, text });
-          return;
+        const cb = onItemClickRef.current;
+        if (cb) {
+          cb({ index: 0, image, text });
+        } else if (image) {
+          openModal(image, text);
         }
-        if (image) openModal(image, text);
       },
+      enableWheel,
+      autoplay,
+      autoplaySpeed,
+      titleMaxWidth,
     });
     return () => {
       app.destroy();
     };
-  }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, onItemClick]);
+  }, [items, bend, textColor, borderRadius, font, scrollSpeed, scrollEase, enableWheel, autoplay, autoplaySpeed]);
   return (
     <>
       <div className="circular-gallery" ref={containerRef} />

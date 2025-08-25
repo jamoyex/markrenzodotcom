@@ -188,13 +188,7 @@ function ChatInterface() {
                 >
                   🛠️ My secret weapons
                 </button>
-                <button
-                  type="button"
-                  className="input-action-btn"
-                  onClick={() => handleSuggestionClick('📸 Peek the gallery')}
-                >
-                  📸 Peek the gallery
-                </button>
+                
               </div>
             </div>
           </form>
