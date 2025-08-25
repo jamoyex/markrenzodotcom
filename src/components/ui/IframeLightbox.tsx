@@ -48,7 +48,7 @@ export default function IframeLightbox() {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.6)',
+        background: 'rgba(0,0,0,0.9)',
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
@@ -59,57 +59,93 @@ export default function IframeLightbox() {
       aria-modal="true"
       role="dialog"
     >
+      {/* Container for title bar and modal */}
       <div
         style={{
-          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
           width: 'min(90vw, 1100px)',
-          height: 'min(80vh, 700px)',
-          background: 'rgba(10,10,10,0.9)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 12,
-          overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6)'
+          gap: '12px'
         }}
-        onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={onClose}
+        {/* Title bar - positioned above the modal within its width */}
+        <div
           style={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            zIndex: 2,
-            border: '1px solid rgba(255,255,255,0.2)',
-            background: 'rgba(30,30,30,0.7)',
-            color: 'white',
-            borderRadius: 8,
-            padding: '6px 10px',
-            cursor: 'pointer'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '100%'
           }}
-          aria-label="Close"
         >
-          ✕
-        </button>
+          {/* Title */}
+          {title ? (
+            <div 
+              style={{ 
+                color: 'white', 
+                fontSize: '16px',
+                fontWeight: '600',
+                textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                flex: 1,
+                marginRight: '16px'
+              }}
+            >
+              {title}
+            </div>
+          ) : null}
 
-        {title ? (
-          <div style={{ position: 'absolute', left: 12, top: 12, color: 'white', opacity: 0.8, zIndex: 2 }}>{title}</div>
-        ) : null}
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            style={{
+              border: 'none',
+              background: 'none',
+              color: 'white',
+              padding: '8px',
+              cursor: 'pointer',
+              fontSize: '24px',
+              fontWeight: '600',
+              textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+              flexShrink: 0
+            }}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
 
+        {/* Main modal container */}
+        <div
+          style={{
+            position: 'relative',
+            width: '100%',
+            height: 'min(80vh, 700px)',
+            background: 'rgba(10,10,10,0.98)',
+            border: '2px solid rgba(255,255,255,0.2)',
+            borderRadius: 16,
+            overflow: 'hidden',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.7)'
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
         {isImage(src) ? (
           <img
             src={src}
             alt={title || 'Lightbox'}
-            style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'black' }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', background: 'black', borderRadius: '14px' }}
           />
         ) : (
           <iframe
             title={title || 'Lightbox'}
             src={src}
-            style={{ width: '100%', height: '100%', border: 'none', background: 'black' }}
+            style={{ width: '100%', height: '100%', border: 'none', background: 'black', borderRadius: '14px' }}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
           />
         )}
+        </div>
       </div>
     </div>
   )

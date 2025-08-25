@@ -21,7 +21,9 @@ export const usePortfolioData = () => {
   return context;
 };
 
-const API_BASE_URL = import.meta.env.PROD ? '/api' : 'http://localhost:3005/api';
+const API_BASE_URL = import.meta.env.PROD 
+  ? '/api' 
+  : `http://${window.location.hostname}:3005/api`;
 
 export const PortfolioDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [portfolioData, setPortfolioData] = useState<PortfolioData>({});

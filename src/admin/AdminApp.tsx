@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react'
 type TableName = 'projects' | 'work_experience' | 'tools' | 'skills' | 'gallery'
 
 const DEV = import.meta.env.DEV
-const API_BASE = DEV ? 'http://localhost:3005/api' : '/api'
+const API_BASE = DEV 
+  ? `http://${window.location.hostname}:3005/api` 
+  : '/api'
 
 function useAdminKey() {
   const [key, setKey] = useState<string>('')

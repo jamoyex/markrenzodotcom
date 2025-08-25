@@ -240,7 +240,7 @@ export default function ProjectCard({ data }: ProjectCardProps) {
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(0, 0, 0, 0.8)',
+            background: 'rgba(0, 0, 0, 0.9)',
             zIndex: 10000,
             display: 'flex',
             alignItems: 'center',
@@ -250,86 +250,122 @@ export default function ProjectCard({ data }: ProjectCardProps) {
         >
           <div
             style={{
-              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
               width: 'min(1200px, 95vw)',
-              height: 'min(82vh, 85vh)',
-              background: 'rgba(12,12,12,0.98)',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              overflow: 'hidden',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+              height: 'min(82vh, 85vh)'
             }}
           >
-            <button
-              onClick={closeModal}
-              aria-label="Close"
-              type="button"
+            {/* Title and close button row - positioned above the modal */}
+            <div
               style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                padding: '6px 10px',
-                borderRadius: '8px',
-                background: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                color: '#fff',
-                cursor: 'pointer',
-                zIndex: 1
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '12px',
+                paddingLeft: '4px',
+                paddingRight: '4px'
               }}
             >
-              ✕
-            </button>
-            {modalUrl && (
-              isImageUrl(modalUrl) ? (
-                <img
-                  src={modalUrl}
-                  alt={data.title}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#111' }}
-                />
-              ) : (
-                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                  <iframe
+              <h2
+                style={{
+                  margin: 0,
+                  color: 'white',
+                  fontSize: '18px',
+                  fontWeight: '600',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                  flex: 1,
+                  textOverflow: 'ellipsis',
+                  overflow: 'hidden',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {data.title}
+              </h2>
+              <button
+                onClick={closeModal}
+                style={{
+                  border: 'none',
+                  background: 'none',
+                  color: 'white',
+                  padding: '8px',
+                  cursor: 'pointer',
+                  fontSize: '20px',
+                  fontWeight: '600',
+                  textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+                  flexShrink: 0,
+                  marginLeft: '16px'
+                }}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal content container */}
+            <div
+              style={{
+                position: 'relative',
+                flex: 1,
+                background: 'rgba(12,12,12,0.98)',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                overflow: 'hidden',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+              }}
+            >
+              {modalUrl && (
+                isImageUrl(modalUrl) ? (
+                  <img
                     src={modalUrl}
-                    title={`${data.title} — Preview`}
-                    style={{ width: '100%', height: '100%', border: 'none', background: '#111' }}
-                    loading="eager"
-                    allow="microphone; camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    referrerPolicy="no-referrer-when-downgrade"
+                    alt={data.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#111' }}
                   />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      padding: '8px 12px',
-                      background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.7) 100%)',
-                      display: 'flex',
-                      gap: '10px',
-                      justifyContent: 'flex-end'
-                    }}
-                  >
-                    <a
-                      href={modalUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                ) : (
+                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <iframe
+                      src={modalUrl}
+                      title={`${data.title} — Preview`}
+                      style={{ width: '100%', height: '100%', border: 'none', background: '#111' }}
+                      loading="eager"
+                      allow="microphone; camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                    <div
                       style={{
-                        padding: '6px 12px',
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        background: 'rgba(255,255,255,0.1)',
-                        color: '#fff',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        textDecoration: 'none'
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        padding: '8px 12px',
+                        background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.7) 100%)',
+                        display: 'flex',
+                        gap: '10px',
+                        justifyContent: 'flex-end'
                       }}
                     >
-                      Open in new tab
-                    </a>
+                      <a
+                        href={modalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          background: 'rgba(255,255,255,0.1)',
+                          color: '#fff',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          textDecoration: 'none'
+                        }}
+                      >
+                        Open in new tab
+                      </a>
+                    </div>
                   </div>
-                </div>
-              )
-            )}
+                )
+              )}
+            </div>
           </div>
         </div>,
         document.body

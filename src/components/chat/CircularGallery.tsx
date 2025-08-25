@@ -536,7 +536,7 @@ class App {
   boundOnWheel!: (e: Event) => void;
   boundOnTouchDown!: (e: MouseEvent | TouchEvent) => void;
   boundOnTouchMove!: (e: MouseEvent | TouchEvent) => void;
-  boundOnTouchUp!: () => void;
+  boundOnTouchUp!: (e?: TouchEvent | MouseEvent) => void;
   boundOnClick!: (e: MouseEvent) => void;
 
   isDown: boolean = false;
@@ -678,9 +678,22 @@ class App {
     this.dragDistance = Math.abs(this.start - x);
   }
 
-  onTouchUp() {
+  onTouchUp(e?: TouchEvent | MouseEvent) {
     this.isDown = false;
     this.onCheck();
+    
+    // For mobile devices, also trigger click logic directly
+    if (e && 'changedTouches' in e && e.changedTouches && e.changedTouches.length > 0) {
+      const touch = e.changedTouches[0];
+      // Create a synthetic mouse event from the touch event
+      const syntheticEvent = {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      } as MouseEvent;
+      
+      // Call the click handler directly for mobile
+      this.handleClickLogic(syntheticEvent);
+    }
   }
 
   onWheel(e: Event) {
@@ -787,12 +800,10 @@ class App {
     }
   }
 
-  onClick(e: MouseEvent) {
+  handleClickLogic(e: MouseEvent) {
     if (!this.medias || this.medias.length === 0) return;
-    // Check if screen size is mobile (768px or less)
-    const isMobileScreen = window.innerWidth <= 768;
-    // Skip drag threshold entirely for mobile devices
-    if (!isMobileScreen && this.dragDistance > this.dragThreshold) return;
+    // Apply drag threshold for all devices - mobile has direct touch handling as fallback
+    if (this.dragDistance > this.dragThreshold) return;
     // Map clientX to world X in viewport space
     const canvasEl = (this.renderer && this.renderer.gl && this.renderer.gl.canvas)
       ? (this.renderer.gl.canvas as HTMLCanvasElement)
@@ -820,6 +831,10 @@ class App {
       window.dispatchEvent(evt);
     } catch {}
     if (this.onItemClick) this.onItemClick(detail);
+  }
+
+  onClick(e: MouseEvent) {
+    this.handleClickLogic(e);
   }
 }
 
@@ -920,41 +935,79 @@ export default function CircularGallery({
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px'
           }}
         >
-          <div
+          {/* Close button - positioned absolutely outside the modal */}
+          <button
+            onClick={closeModal}
+            aria-label="Close"
+            type="button"
             style={{
-              position: 'relative', width: 'min(1200px, 95vw)', height: 'min(82vh, 85vh)',
-              background: 'rgba(12,12,12,0.98)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.15)',
-              overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.5)'
+              position: 'absolute', top: '20px', right: '20px', zIndex: 10001,
+              padding: '10px 16px', borderRadius: '12px', fontSize: '14px', fontWeight: '600',
+              background: 'rgba(0,0,0,0.8)', border: '2px solid rgba(255,255,255,0.3)', 
+              color: '#fff', cursor: 'pointer', transition: 'all 0.2s ease',
+              backdropFilter: 'blur(10px)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+            }}
+            onMouseOver={(e) => { 
+              e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; 
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)';
+            }}
+            onMouseOut={(e) => { 
+              e.currentTarget.style.background = 'rgba(0,0,0,0.8)'; 
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
             }}
           >
-            <button
-              onClick={closeModal}
-              aria-label="Close"
-              type="button"
+            ✕ Close
+          </button>
+
+          {/* Title - positioned absolutely above the modal */}
+          <div
+            style={{
+              position: 'absolute', top: '20px', left: '20px', right: '180px', zIndex: 10001,
+              padding: '12px 20px', borderRadius: '12px',
+              background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)',
+              border: '2px solid rgba(255,255,255,0.3)', boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+            }}
+          >
+            <h3
               style={{
-                position: 'absolute', top: '10px', right: '10px', padding: '6px 10px', borderRadius: '8px',
-                background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', cursor: 'pointer', zIndex: 1
+                margin: 0, color: '#fff', fontSize: '16px', fontWeight: '600',
+                textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap'
               }}
             >
-              ✕
-            </button>
+              {modalTitle || 'Media Preview'}
+            </h3>
+          </div>
+
+          {/* Content container - the actual iframe modal */}
+          <div
+            style={{
+              width: 'min(1200px, 95vw)', height: 'min(80vh, 85vh)',
+              background: 'rgba(12,12,12,0.98)', borderRadius: '16px', 
+              border: '2px solid rgba(255,255,255,0.2)', overflow: 'hidden',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.7)', marginTop: '60px'
+            }}
+          >
             {isImageUrl(modalUrl) ? (
-              <img src={modalUrl} alt={modalTitle} style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#111' }} />
+              <img 
+                src={modalUrl} 
+                alt={modalTitle} 
+                style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#111' }} 
+              />
             ) : (
               <div style={{ position: 'relative', width: '100%', height: '100%' }}>
                 <iframe
                   src={modalUrl}
                   title={modalTitle || 'Preview'}
-                  style={{ width: '100%', height: '100%', border: 'none', background: '#111' }}
+                  style={{ width: '100%', height: '100%', border: 'none', background: '#111', borderRadius: '14px' }}
                   loading="eager"
                   allow="microphone; camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   referrerPolicy="no-referrer-when-downgrade"
                 />
                 <div
                   style={{
-                    position: 'absolute', bottom: 0, left: 0, right: 0, padding: '8px 12px',
-                    background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.7) 100%)',
-                    display: 'flex', gap: '10px', justifyContent: 'flex-end'
+                    position: 'absolute', bottom: 0, left: 0, right: 0, padding: '16px 20px',
+                    background: 'linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.6) 50%, rgba(0,0,0,0.9) 100%)',
+                    display: 'flex', gap: '12px', justifyContent: 'flex-end', borderRadius: '0 0 14px 14px'
                   }}
                 >
                   <a
@@ -962,11 +1015,21 @@ export default function CircularGallery({
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      padding: '6px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '500',
-                      background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)', textDecoration: 'none'
+                      padding: '10px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: '600',
+                      background: 'rgba(255,255,255,0.2)', color: '#fff', 
+                      border: '1px solid rgba(255,255,255,0.3)', textDecoration: 'none',
+                      transition: 'all 0.2s ease', backdropFilter: 'blur(5px)'
+                    }}
+                    onMouseOver={(e) => { 
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.3)'; 
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.5)';
+                    }}
+                    onMouseOut={(e) => { 
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; 
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)';
                     }}
                   >
-                    Open in new tab
+                    ↗ Open in new tab
                   </a>
                 </div>
               </div>
