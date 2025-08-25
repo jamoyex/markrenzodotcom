@@ -542,7 +542,8 @@ class App {
   isDown: boolean = false;
   start: number = 0;
   dragDistance: number = 0;
-  dragThreshold: number = 6; // pixels before considering it a drag
+  dragThreshold: number = 15; // pixels before considering it a drag (increased for mobile)
+  isTouchDevice: boolean = false;
 
   constructor(
     container: HTMLElement,
@@ -664,6 +665,7 @@ class App {
   onTouchDown(e: MouseEvent | TouchEvent) {
     try { (e as any).preventDefault?.(); } catch {}
     this.isDown = true;
+    this.isTouchDevice = "touches" in e;
     this.scroll.position = this.scroll.current;
     this.start = "touches" in e ? e.touches[0].clientX : e.clientX;
     this.dragDistance = 0;
@@ -789,8 +791,10 @@ class App {
 
   onClick(e: MouseEvent) {
     if (!this.medias || this.medias.length === 0) return;
+    // Use different thresholds for touch vs mouse interactions
+    const effectiveThreshold = this.isTouchDevice ? 25 : this.dragThreshold;
     // If the user just dragged beyond threshold, do not treat as a click
-    if (this.dragDistance > this.dragThreshold) return;
+    if (this.dragDistance > effectiveThreshold) return;
     // Map clientX to world X in viewport space
     const canvasEl = (this.renderer && this.renderer.gl && this.renderer.gl.canvas)
       ? (this.renderer.gl.canvas as HTMLCanvasElement)
