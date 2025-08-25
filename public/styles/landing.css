@@ -1,0 +1,75 @@
+/* Shared styles for static landing pages */
+/* Fonts loaded in each page head to match homepage */
+:root {
+  --bg-start: #0a0a0a;
+  --bg-mid: #141414;
+  --bg-accent: #ff4664;
+  --text: #eaeaea;
+  --muted: #a3a3a3;
+  --card: #1a1a1a;
+  --border: #2a2a2a;
+  --brand: #f5f5f5;
+  --brand-dim: #c7c7c7;
+  --primary: #6ee7ff;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'General Sans', 'Montserrat', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  color: var(--text);
+  background: linear-gradient(180deg, #0c0c0c 0%, #0a0a0a 40%, #090909 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  min-height: 100vh;
+  position: relative;
+}
+.page-bg-bottom::after { content: none; }
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  padding: 10px 24px;
+  background: linear-gradient(180deg, rgba(10,10,10,0.85), rgba(10,10,10,0.55) 60%, rgba(10,10,10,0));
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  width: 100%;
+}
+.site-header.container { max-width: none; }
+.site-header nav { display: flex; align-items: center; gap: 10px; height: 100%; }
+.brand { color: var(--brand); text-decoration: none; font-weight: 700; letter-spacing: 0.4px; display: inline-flex; align-items: center; height: 100%; }
+.btn-primary { color: #0a0a0a; background: var(--primary); text-decoration: none; padding: 8px 18px; border-radius: 999px; font-weight: 700; box-shadow: 0 12px 36px rgba(110,231,255,0.28); border: 1px solid rgba(255,255,255,0.12); transition: transform .15s ease, filter .15s ease; }
+.btn-primary:hover { filter: brightness(1.05); }
+.btn-primary:active { transform: translateY(1px); }
+.btn-ghost { color: var(--brand); text-decoration: none; padding: 12px 18px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,0.04); }
+.container { max-width: 1120px; margin: 0 auto; padding: 32px 20px 64px; }
+header.site-header.container { padding: 8px 24px !important; min-height: 64px !important; }
+.hero { text-align: center; padding: 104px 0 48px; position: relative; overflow: hidden; border-radius: 18px; z-index: 0; }
+.hero::before { content: ''; position: absolute; inset: 0; z-index: -1; 
+  background-image: 
+    linear-gradient(180deg, rgba(8,8,8,0.65) 0%, rgba(8,8,8,0.55) 30%, rgba(8,8,8,0.7) 70%, rgba(8,8,8,0.92) 100%),
+    var(--hero-image, url('https://images.unsplash.com/photo-1551281044-8d8f1b6c8f52?q=80&w=1887&auto=format&fit=crop'));
+  background-size: cover, cover; background-position: center, center; background-repeat: no-repeat;
+  filter: saturate(1.1) contrast(1.05);
+}
+.hero::after { content:''; position:absolute; inset:-12% -12% -20% -12%; pointer-events:none; z-index:-1; background:
+  radial-gradient(1200px 520px at 50% 100%, rgba(0,0,0,0.85), rgba(0,0,0,0) 70%);
+}
+.hero h1 { font-size: clamp(28px, 4vw, 46px); margin: 0 0 12px; letter-spacing: -0.02em; }
+.hero p { margin: 0 auto; max-width: 800px; color: var(--muted); line-height: 1.7; font-size: 18px; }
+.hero-ctas { display: flex; gap: 12px; justify-content: center; margin-top: 24px; flex-wrap: wrap; }
+.section { margin-top: 40px; }
+.cards { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; align-items: stretch; }
+.card { grid-column: span 12; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+.card h3 { margin: 0 0 8px; font-size: 18px; }
+.card p { margin: 0; color: var(--muted); line-height: 1.7; }
+@media (min-width: 720px) { .card { grid-column: span 4; } }
+.badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.badge { font-size: 13px; color: var(--brand); border: 1px solid var(--border); background: rgba(255,255,255,0.02); padding: 6px 10px; border-radius: 999px; }
+.faq-item { border: 1px solid var(--border); background: var(--card); border-radius: 12px; padding: 16px; margin-top: 12px; }
+.faq-item h4 { margin: 0 0 6px; font-size: 16px; }
+.footer { margin-top: 48px; color: var(--muted); font-size: 13px; text-align: center; border-top: 1px solid var(--border); padding-top: 18px; opacity: 0.9; }

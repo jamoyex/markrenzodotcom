@@ -20,6 +20,7 @@ const __dirname = dirname(__filename);
 
 const app = express();
 const port = parseInt(process.env.PORT || '3005', 10);
+const hostUrl = (process.env.HOST_URL || 'https://markrenzo.com').replace(/\/$/, '');
 
 // Middleware
 app.use(cors({
@@ -447,6 +448,39 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     database: dbFunctionsAvailable ? 'loaded' : 'fallback'
   });
+});
+
+// robots.txt - allow crawling and point to sitemap
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  const base = hostUrl || `${req.protocol}://${req.get('host')}`;
+  res.send([
+    'User-agent: *',
+    'Allow: /',
+    '',
+    `Sitemap: ${base}/sitemap.xml`
+  ].join('\n'));
+});
+
+// Simple sitemap.xml for a single-page app
+app.get('/sitemap.xml', (req, res) => {
+  res.type('application/xml');
+  const base = hostUrl || `${req.protocol}://${req.get('host')}`;
+  const urls = [
+    '/',
+    '/ai-automation-melbourne/',
+    '/chatbot-developer/',
+    '/n8n-zapier-make/',
+    '/custom-saas-development/',
+    '/crm-automations-lead-generation/'
+  ];
+  const xml = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...urls.map(u => `  <url><loc>${base}${u}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>`),
+    '</urlset>'
+  ].join('\n');
+  res.send(xml);
 });
 
 // Simple test endpoint that doesn't depend on database
