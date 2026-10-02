@@ -57,13 +57,39 @@ npm run dev:full
 NODE_ENV=production
 PORT=3005
 
-# Database Configuration
-DB_HOST=your-database-host
-DB_PORT=5432
-DB_NAME=markrenzo_portfolio
-DB_USER=your-username
-DB_PASSWORD=your-password
+# Database Configuration (dummy example; replace privately)
+DATABASE_URL=postgresql://portfolio_user:replace_me@db.example.com:5432/markrenzo_portfolio?sslmode=verify-full
 ```
+
+`DATABASE_URL` is the preferred server-side configuration. It takes precedence over
+all five legacy `DB_*` connection fields. Use `postgres://` or `postgresql://`, include
+a username, password, host and database, and percent-encode special characters in
+credentials (for example, `@` as `%40`). The port defaults to 5432. An empty or invalid
+`DATABASE_URL` is an error; it never silently falls back to another database.
+
+URL connections always verify the PostgreSQL TLS certificate and hostname, including
+when no `sslmode` is specified. `sslmode=verify-full` is recommended; `sslmode=require`
+also performs full verification in this app. Other modes and URL query parameters
+are rejected so they cannot override TLS verification. For a private certificate
+authority, set `DB_SSL_CA` to its PEM certificate(s), using actual newlines or `\n`.
+Otherwise the Node.js default trusted CAs are used. The server must support PostgreSQL
+TLS and present a valid certificate matching the hostname in the URL. HTTPS on the
+portfolio website alone does not secure the PostgreSQL connection.
+
+Existing deployments can omit `DATABASE_URL` and continue using all of `DB_HOST`,
+`DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD`. This preserves their previous
+non-TLS behavior for compatibility. Set `DB_SSL_MODE=verify-full` to enable verified
+TLS for that fallback; providing `DB_SSL_CA` also enables verified TLS. Do not use the
+legacy non-TLS default for a remote database connection. To switch back to legacy
+fields, remove `DATABASE_URL` rather than setting it to an empty string.
+
+Keep these variables in backend runtime secrets or a gitignored `.env`, never in
+`VITE_*` variables or frontend code. See [.env.example](.env.example) and
+[the deployment guide](DEPLOYMENT.md) for configuration. After secure connectivity
+is configured, `npm run db:test` runs only `SELECT 1`, closes the pool, and exits
+nonzero for invalid configuration or a failed connection. It does not initialize
+tables or change data. The setup/seed/import scripts referenced in `package.json`
+are not present in this checkout.
 
 ## 📝 **Available Scripts**
 
@@ -85,6 +111,8 @@ npm run db:reset     # Reset database (re-run setup)
 
 # Code Quality
 npm run lint         # Run ESLint
+npm test             # Offline database configuration tests (no live DB)
+npm run typecheck:database # Type-check database configuration, client and tests
 ```
 
 ## 🏢 **Project Structure**
@@ -165,7 +193,7 @@ The application uses PostgreSQL with the following main tables:
 ### **Common Issues**
 
 - **Port conflicts**: Change PORT in environment variables
-- **Database connection**: Verify all DB_* environment variables
+- **Database connection**: Verify `DATABASE_URL` (or all five legacy fields), TLS support and CA trust
 - **Build failures**: Check for TypeScript errors with `npm run lint`
 
 ## 📦 **Dependencies**
@@ -197,4 +225,4 @@ MIT License - see LICENSE file for details.
 
 ---
 
-**Built with ❤️ by Mark Renzo Mariveles** 
+**Built with ❤️ by Mark Renzo Mariveles**

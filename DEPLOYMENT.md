@@ -20,12 +20,39 @@ PORT=3005
 
 ### **Database Configuration (PostgreSQL)**
 ```bash
-DB_HOST=your-database-host.com
-DB_PORT=5432
-DB_NAME=markrenzo_portfolio
-DB_USER=your-db-username
-DB_PASSWORD=your-db-password
+DATABASE_URL=postgresql://portfolio_user:replace_me@db.example.com:5432/markrenzo_portfolio?sslmode=verify-full
 ```
+
+This is a dummy example. Set the real URL privately as a **backend runtime secret**
+in the Coolify application and, separately, in any coding environment that needs
+database access. Coolify's variables are not automatically available in a separate
+coding environment. Never prefix database variables with `VITE_` or commit `.env`.
+
+`DATABASE_URL` takes precedence over `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and
+`DB_PASSWORD`. An invalid or empty URL fails configuration; it does not fall back.
+Both PostgreSQL URL schemes are supported, and a missing port defaults to 5432.
+Percent-encode special characters in the username/password.
+
+URL connections require verified PostgreSQL TLS, even without a query parameter.
+The only supported query parameter is one `sslmode=verify-full` or `sslmode=require`;
+both verify the certificate chain and hostname. Modes such as `disable`, `no-verify`
+and `verify-ca`, and parameters such as `ssl`, `sslrootcert` or `uselibpqcompat`, are
+rejected. For a private CA, supply `DB_SSL_CA` as PEM certificate(s), with actual
+newlines or escaped `\n`. No private key is needed in this variable.
+
+The database endpoint must already be reachable from the backend and support
+PostgreSQL TLS with a valid certificate whose DNS name (or IP SAN) matches the URL
+host. Configure the certificate and CA trust on the database side before attempting
+remote authentication. A website's Coolify/Cloudflare HTTPS certificate does not
+automatically enable PostgreSQL TLS. If verification fails, correct TLS support,
+certificate names or CA trust; do not disable verification or expose the database
+as a workaround.
+
+For existing installations, omitting `DATABASE_URL` retains all five legacy `DB_*`
+fields and their previous non-TLS default. Use `DB_SSL_MODE=verify-full` (or set
+`DB_SSL_CA`) to enable verified TLS with those fields. The non-TLS fallback is for
+compatibility only, not remote authentication. Remove the URL variable entirely
+when selecting the fallback.
 
 ## 🚀 **Coolify Deployment**
 
@@ -33,11 +60,13 @@ DB_PASSWORD=your-db-password
 In your Coolify application dashboard, set these environment variables:
 - `NODE_ENV` → `production`
 - `PORT` → `3005`
-- `DB_HOST` → Your PostgreSQL host
-- `DB_PORT` → `5432` (or your custom port)
-- `DB_NAME` → `markrenzo_portfolio`
-- `DB_USER` → Your database username
-- `DB_PASSWORD` → Your database password
+- `DATABASE_URL` → Your PostgreSQL URL, using the verified TLS configuration above
+- `DB_SSL_CA` → Optional PEM CA certificate(s) if the server uses a private CA
+
+After secure connectivity is configured, run `npm run db:test` for a read-only
+`SELECT 1` check. It exits with status 1 on configuration/connection failure and
+closes the pool. `/api/health` reports whether database functions loaded, not whether
+database connectivity or TLS verification succeeded.
 
 ### **2. Deployment Configuration**
 Coolify automatically detects the `nixpacks.toml` configuration:
@@ -158,7 +187,8 @@ curl https://v2.markrenzo.com/api/identifiers
 **Symptoms**: API works but returns fallback data
 
 **Solutions**:
-- Verify all `DB_*` environment variables
+- Verify `DATABASE_URL` or all five legacy `DB_*` connection fields
+- Check PostgreSQL TLS support, certificate hostname and CA trust
 - Test database connectivity from container
 - Check PostgreSQL server logs
 - Ensure database accepts connections from container IP
@@ -258,4 +288,4 @@ curl -f https://v2.markrenzo.com/ || echo "FRONTEND DOWN"
 
 ---
 
-**For support, check container logs in Coolify dashboard or contact the development team.** 
+**For support, check container logs in Coolify dashboard or contact the development team.**

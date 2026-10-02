@@ -1,35 +1,22 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import { DatabaseConfigError, getDatabaseConfig } from '../../server/database-config.ts';
 
 // Load environment variables
 if (typeof window === 'undefined') {
-  dotenv.config();
+  dotenv.config({ quiet: true });
 }
 
 // Only create database connection server-side
 let pool: Pool | null = null;
 
 if (typeof window === 'undefined') {
-  // Database connection configuration - ONLY from environment variables
-  const dbConfig = {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : undefined,
-    database: process.env.DB_NAME,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    ssl: false,
-    max: 20,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
-  };
-
-  // Validate required environment variables
-  if (!dbConfig.host || !dbConfig.port || !dbConfig.database || !dbConfig.user || !dbConfig.password) {
-    console.error('Missing required database environment variables. Please check your .env file.');
-    console.error('Required: DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD');
-  } else {
-    // Create connection pool only if all env vars are present
-    pool = new Pool(dbConfig);
+  try {
+    pool = new Pool(getDatabaseConfig(process.env));
+    // Idle-client errors may contain connection details; never log the raw error/client.
+    pool.on('error', () => console.error('Database pool connection failed.'));
+  } catch (error) {
+    console.error(error instanceof DatabaseConfigError ? error.message : 'Database configuration failed.');
   }
 }
 
@@ -39,19 +26,15 @@ export { pool };
 // Test database connection
 export async function testConnection(): Promise<boolean> {
   if (!pool) {
-    console.error('Database pool not available - running in browser context');
+    console.error('Database pool not available. Check server-side database configuration.');
     return false;
   }
   try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT NOW() as current_time, version() as pg_version');
+    await pool.query('SELECT 1');
     console.log('✅ Database connected successfully!');
-    console.log('📅 Server time:', result.rows[0].current_time);
-    console.log('🗄️ PostgreSQL version:', result.rows[0].pg_version.split(' ')[0]);
-    client.release();
     return true;
-  } catch (error) {
-    console.error('❌ Database connection failed:', error);
+  } catch {
+    console.error('Database connection failed. Check reachability, credentials and verified TLS configuration.');
     return false;
   }
 }
@@ -75,9 +58,9 @@ export async function fetchWorkExperience(identifier?: string) {
     client.release();
     
     return identifier ? result.rows[0] : result.rows;
-  } catch (error) {
-    console.error('Error fetching work experience:', error);
-    throw error;
+  } catch {
+    // Driver errors can include connection details; expose only a fixed message.
+    throw new Error('Database query failed while fetching work experience.');
   }
 }
 
@@ -99,9 +82,9 @@ export async function fetchProjects(identifier?: string) {
     client.release();
     
     return identifier ? result.rows[0] : result.rows;
-  } catch (error) {
-    console.error('Error fetching projects:', error);
-    throw error;
+  } catch {
+    // Driver errors can include connection details; expose only a fixed message.
+    throw new Error('Database query failed while fetching projects.');
   }
 }
 
@@ -123,9 +106,9 @@ export async function fetchTools(identifier?: string) {
     client.release();
     
     return identifier ? result.rows[0] : result.rows;
-  } catch (error) {
-    console.error('Error fetching tools:', error);
-    throw error;
+  } catch {
+    // Driver errors can include connection details; expose only a fixed message.
+    throw new Error('Database query failed while fetching tools.');
   }
 }
 
@@ -147,9 +130,9 @@ export async function fetchSkills(identifier?: string) {
     client.release();
     
     return identifier ? result.rows[0] : result.rows;
-  } catch (error) {
-    console.error('Error fetching skills:', error);
-    throw error;
+  } catch {
+    // Driver errors can include connection details; expose only a fixed message.
+    throw new Error('Database query failed while fetching skills.');
   }
 }
 
@@ -171,9 +154,9 @@ export async function fetchGallery(identifier?: string) {
     client.release();
     
     return identifier ? result.rows[0] : result.rows;
-  } catch (error) {
-    console.error('Error fetching gallery:', error);
-    throw error;
+  } catch {
+    // Driver errors can include connection details; expose only a fixed message.
+    throw new Error('Database query failed while fetching gallery.');
   }
 }
 
@@ -206,9 +189,9 @@ export async function getAllIdentifiers() {
     };
     
     return identifiers;
-  } catch (error) {
-    console.error('Error fetching identifiers:', error);
-    throw error;
+  } catch {
+    // Driver errors can include connection details; expose only a fixed message.
+    throw new Error('Database query failed while fetching identifiers.');
   }
 }
 
@@ -221,4 +204,4 @@ if (typeof window === 'undefined' && pool) {
       process.exit(0);
     });
   });
-} 
+}
