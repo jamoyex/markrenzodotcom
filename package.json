@@ -12,7 +12,9 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "db:setup": "npx tsx scripts/setup-database.ts",
-    "db:test": "npx tsx -e \"import('./src/lib/database.ts').then(db => db.testConnection().then(() => process.exit(0)))\"",
+    "db:test": "tsx server/test-database.ts",
+    "test": "tsx --test tests/*.test.ts",
+    "typecheck:database": "tsc -p tsconfig.database.json",
     "db:reset": "npm run db:setup",
     "db:seed": "npx tsx scripts/reset-and-seed.ts",
     "db:import:slides": "npx tsx scripts/scrape-slides-projects.ts"

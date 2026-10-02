@@ -253,9 +253,9 @@ app.get('/api/admin/:table', adminAuth, async (req, res) => {
     const { rows } = await client.query(`SELECT * FROM ${table} ORDER BY ${orderBy} LIMIT 200`);
     client.release();
     res.json(rows);
-  } catch (error) {
-    logger.error('Admin GET error:', error);
-    res.status(500).json(createSafeErrorResponse('Admin fetch failed', error));
+  } catch {
+    logger.error('Admin GET database operation failed.');
+    res.status(500).json(createSafeErrorResponse('Admin fetch failed'));
   }
 });
 
@@ -293,9 +293,9 @@ app.post('/api/admin/:table', adminAuth, async (req, res) => {
     const { rows } = await client.query(sql, values);
     client.release();
     res.json(rows[0]);
-  } catch (error) {
-    logger.error('Admin POST error:', error);
-    res.status(500).json(createSafeErrorResponse('Admin save failed', error));
+  } catch {
+    logger.error('Admin POST database operation failed.');
+    res.status(500).json(createSafeErrorResponse('Admin save failed'));
   }
 });
 
@@ -323,9 +323,9 @@ app.put('/api/admin/:table/:id', adminAuth, async (req, res) => {
     const { rows } = await client.query(`UPDATE ${table} SET ${setSql} WHERE id = $${keys.length + 1} RETURNING *`, values);
     client.release();
     res.json(rows[0]);
-  } catch (error) {
-    logger.error('Admin PUT error:', error);
-    res.status(500).json(createSafeErrorResponse('Admin update failed', error));
+  } catch {
+    logger.error('Admin PUT database operation failed.');
+    res.status(500).json(createSafeErrorResponse('Admin update failed'));
   }
 });
 
@@ -338,9 +338,9 @@ app.delete('/api/admin/:table/:id', adminAuth, async (req, res) => {
     await client.query(`DELETE FROM ${table} WHERE id = $1`, [Number(id)]);
     client.release();
     res.json({ ok: true });
-  } catch (error) {
-    logger.error('Admin DELETE error:', error);
-    res.status(500).json(createSafeErrorResponse('Admin delete failed', error));
+  } catch {
+    logger.error('Admin DELETE database operation failed.');
+    res.status(500).json(createSafeErrorResponse('Admin delete failed'));
   }
 });
 app.get('/api/portfolio/:identifier', async (req, res) => {
@@ -365,8 +365,8 @@ app.get('/api/portfolio/:identifier', async (req, res) => {
     if (dbFunctionsAvailable) {
       try {
         result = await getPortfolioItemFromDatabase(identifier);
-      } catch (dbError) {
-        logger.error('Database Error:', dbError);
+      } catch {
+        logger.error('Database operation failed.');
         // Return fallback data if database fails
         return res.json({
           type: 'skill',
@@ -406,8 +406,8 @@ app.get('/api/identifiers', async (req, res) => {
     if (dbFunctionsAvailable) {
       try {
         identifiers = await getAllIdentifiersFromDatabase();
-      } catch (dbError) {
-        logger.error('Database Error:', dbError);
+      } catch {
+        logger.error('Database operation failed.');
         // Return fallback identifiers if database fails
         return res.json({
           skills: ['skill_ai', 'skill_leadership', 'skill_fullstack'],
