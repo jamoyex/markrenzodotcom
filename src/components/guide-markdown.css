@@ -1,0 +1,163 @@
+.guide-markdown {
+  min-width: 0;
+  margin-top: 7px;
+  font: 13px/1.65 var(--font-body);
+  overflow-wrap: anywhere;
+}
+
+.ai-guide-panel .guide-markdown p {
+  margin: 0;
+  font: inherit;
+  white-space: normal;
+}
+
+.ai-guide-panel .guide-message .guide-markdown > * + * {
+  margin-top: 12px;
+}
+
+.guide-markdown strong {
+  font-weight: 700;
+}
+
+.guide-markdown a,
+.guide-markdown-link {
+  display: inline;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--blue);
+  font: inherit;
+  font-weight: 600;
+  text-align: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  transition: background-color 150ms ease;
+}
+
+.guide-markdown a:hover,
+.guide-markdown-link:hover {
+  background-color: #ddef8b80;
+}
+
+.guide-markdown a:focus-visible,
+.guide-markdown-link:focus-visible {
+  outline-offset: 3px;
+}
+
+.guide-markdown-external {
+  display: inline-block;
+  margin-left: 3px;
+  font-size: 0.9em;
+  text-decoration: none;
+}
+
+.guide-markdown .guide-markdown-heading {
+  margin-bottom: 6px;
+  color: var(--ink);
+  font: 700 14px/1.4 var(--font-body);
+  letter-spacing: 0;
+}
+
+.guide-markdown ul,
+.guide-markdown ol {
+  padding-left: 1.4em;
+  margin-bottom: 0;
+}
+
+.guide-markdown li {
+  padding-left: 3px;
+}
+.guide-markdown li + li {
+  margin-top: 7px;
+}
+.guide-markdown li::marker {
+  color: var(--blue);
+}
+.guide-markdown li > ul,
+.guide-markdown li > ol,
+.ai-guide-panel .guide-markdown li > p + p {
+  margin-top: 7px;
+}
+
+.guide-markdown blockquote {
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--blue);
+  border-radius: 0 5px 5px 0;
+  background: #ddef8b33;
+}
+
+.guide-markdown code {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #2453ff0a;
+  font: 0.88em/1.6 var(--font-mono);
+}
+
+.guide-markdown pre {
+  max-width: 100%;
+  margin-bottom: 0;
+  padding: 12px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: #eeeee6;
+  font: inherit;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+
+.guide-markdown pre code {
+  padding: 0;
+  background: none;
+}
+.guide-markdown hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.guide-markdown-table {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.guide-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.guide-markdown th,
+.guide-markdown td {
+  padding: 8px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.guide-markdown th {
+  background: #ddef8b55;
+  font-weight: 700;
+}
+.guide-markdown tr + tr td,
+.guide-markdown tbody tr:first-child td {
+  border-top: 1px solid var(--line);
+}
+.guide-markdown > :first-child {
+  margin-top: 0;
+}
+.guide-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide-markdown a,
+  .guide-markdown-link {
+    transition: none;
+  }
+}

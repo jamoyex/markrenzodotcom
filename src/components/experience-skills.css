@@ -1,0 +1,1024 @@
+.es-root {
+  --es-paper: var(--paper, #f6f5ef);
+  --es-ink: var(--ink, #20211e);
+  --es-blue: var(--blue, #2453ff);
+  --es-citron: var(--citron, #ddef8b);
+  --es-ease-out: var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1));
+  font-family: var(--font-body);
+  color: var(--es-ink);
+}
+.es-root * {
+  box-sizing: border-box;
+}
+.es-root button,
+.es-root summary {
+  font: inherit;
+}
+.es-shell {
+  width: min(1320px, calc(100% - 112px));
+  margin-inline: auto;
+}
+.es-kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 10px/1.6 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.es-kicker:before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.es-root h2:focus {
+  outline-offset: 8px;
+}
+.es-root summary:focus-visible,
+.es-root a:focus-visible {
+  outline: 2px solid var(--es-blue);
+  outline-offset: 6px;
+}
+.es-skills summary:focus-visible,
+.es-skills a:focus-visible {
+  outline-color: var(--es-citron);
+}
+.es-skills {
+  position: relative;
+  padding: 112px 0 0;
+  background: var(--es-ink);
+  color: var(--es-paper);
+  isolation: isolate;
+  overflow: hidden;
+}
+.es-skills:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(#f6f5ef0c 1px, transparent 1px);
+  background-size: 22px 22px;
+  z-index: -1;
+}
+.es-skills-heading {
+  display: grid;
+  grid-template-columns: 1.45fr 0.55fr;
+  align-items: end;
+  gap: 60px;
+  margin-bottom: 78px;
+}
+.es-skills-heading .es-kicker {
+  color: var(--es-citron);
+  margin-bottom: 24px;
+}
+.es-skills-title {
+  font: clamp(76px, 8vw, 125px)/0.79 var(--font-pixel);
+  letter-spacing: -0.03em;
+}
+.es-heading-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.09em;
+  margin-bottom: -0.09em;
+}
+.es-heading-line > span {
+  display: block;
+}
+.es-skills-title .es-heading-line:last-child {
+  color: var(--es-citron);
+}
+.es-skills-intro {
+  position: relative;
+  padding-bottom: 7px;
+}
+.es-toolbox-stamp {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 0 33px 8px;
+  background: var(--es-citron);
+  color: var(--es-ink);
+  border: 4px solid var(--es-paper);
+  border-radius: 5px;
+  transform: rotate(8deg);
+  box-shadow: 6px 6px 0 #f6f5ef17;
+}
+.es-skills-intro > p {
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 275px;
+  color: #b9bcb0;
+}
+.es-skills-intro .es-open-cue {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 22px;
+  font: 10px var(--font-mono);
+  color: var(--es-citron);
+}
+.es-disciplines {
+  border-top: 1px solid #f6f5ef45;
+}
+.es-discipline {
+  border-bottom: 1px solid #f6f5ef45;
+}
+.es-discipline > summary {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) 120px 35px;
+  align-items: center;
+  gap: 18px;
+  cursor: pointer;
+  padding: 28px 0;
+  user-select: none;
+}
+.es-discipline > summary::-webkit-details-marker {
+  display: none;
+}
+.es-discipline-number {
+  font: 11px var(--font-mono);
+  color: #93998a;
+  align-self: start;
+  padding-top: 10px;
+}
+.es-discipline-title {
+  font-size: clamp(25px, 3.2vw, 48px);
+  font-weight: 500;
+  line-height: 1.13;
+  letter-spacing: -0.05em;
+  transition: color 0.2s ease;
+}
+.es-discipline-count {
+  font: 9px/1.6 var(--font-mono);
+  color: #a2a799;
+  text-align: right;
+}
+.es-discipline-toggle {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #f6f5ef50;
+  border-radius: 50%;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s var(--es-ease-out);
+}
+.es-discipline-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+.es-discipline[open] .es-discipline-toggle {
+  background: var(--es-citron);
+  color: var(--es-ink);
+  border-color: var(--es-citron);
+  transform: rotate(45deg);
+}
+.es-discipline[open] .es-discipline-title {
+  color: var(--es-citron);
+}
+.es-discipline-body {
+  overflow: hidden;
+}
+.es-discipline-content {
+  padding: 2px 55px 36px 88px;
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 60px;
+}
+.es-discipline-description {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #bbc0b1;
+  max-width: 360px;
+}
+.es-capability-skills {
+  padding: 0;
+  margin: 20px 0 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.es-capability-skills li {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #ecede6;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.es-capability-skills li:before {
+  content: "↗";
+  color: var(--es-citron);
+  font-family: var(--font-mono);
+}
+.es-tools-label {
+  font: 9px var(--font-mono);
+  letter-spacing: 0.12em;
+  color: #868e7b;
+  margin: 0 0 15px;
+  text-transform: uppercase;
+}
+.es-tools-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 13px 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.es-tools-list li {
+  font: 13px/1.4 var(--font-mono);
+  color: #f2f3e9;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f6f5ef35;
+  white-space: nowrap;
+}
+.es-discipline-remark {
+  font: 11px/1.7 var(--font-mono);
+  color: #9fa693;
+  max-width: 390px;
+}
+.es-skills-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 25px;
+  align-items: center;
+  padding: 26px 0 31px;
+  font: 9px/1.6 var(--font-mono);
+  color: #8d9580;
+}
+.es-skills-bottom > span:last-child {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--es-citron);
+}
+.es-skills-bottom svg {
+  width: 17px;
+}
+.es-type-strip {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid #f6f5ef35;
+  padding: 24px 0 14px;
+  color: #343b2b;
+  user-select: none;
+  pointer-events: none;
+}
+.es-type-track {
+  display: flex;
+  gap: 35px;
+  align-items: center;
+  width: max-content;
+  font: clamp(80px, 10.5vw, 165px)/0.78 var(--font-pixel);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  transform: translateX(-45px);
+}
+.es-type-track span:nth-child(2) {
+  color: var(--es-citron);
+  font-size: 0.47em;
+}
+.es-type-track span:nth-child(4) {
+  color: var(--es-blue);
+  font-size: 0.47em;
+}
+.es-experience {
+  padding: 115px 0 104px;
+  background: var(--es-paper);
+  position: relative;
+}
+.es-experience-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 33px;
+  border-bottom: 1px solid #20211e40;
+}
+.es-experience-top > a {
+  font: 10px var(--font-mono);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.es-experience-top > a:hover {
+  color: var(--es-blue);
+}
+.es-career-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: start;
+  gap: 85px;
+  padding-top: 64px;
+}
+.es-career-rail {
+  align-self: start;
+  position: relative;
+  padding-top: 0;
+}
+.es-career-title {
+  font: clamp(70px, 6.4vw, 99px)/0.79 var(--font-pixel);
+  letter-spacing: -0.035em;
+  max-width: 460px;
+}
+.es-career-title span {
+  color: var(--es-blue);
+}
+.es-career-intro {
+  font-size: 14px;
+  line-height: 1.75;
+  max-width: 315px;
+  color: #656a5e;
+  margin-top: 27px;
+}
+.es-year-window {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  margin-top: 54px;
+  padding-top: 21px;
+  border-top: 1px solid #20211e33;
+  max-width: 310px;
+}
+.es-year-number {
+  font: clamp(100px, 9vw, 144px)/0.85 var(--font-pixel);
+  letter-spacing: -0.04em;
+  color: var(--es-blue);
+}
+.es-year-caption {
+  font: 9px/1.6 var(--font-mono);
+  color: #747968;
+  max-width: 68px;
+}
+.es-chapter-counter {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 16px;
+  max-width: 310px;
+  font: 9px var(--font-mono);
+  letter-spacing: 0.05em;
+}
+.es-chapter-counter > span:last-child {
+  color: #787e6e;
+}
+.es-rail-note {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-top: 36px;
+  color: #7d826f;
+  font: 9px/1.6 var(--font-mono);
+}
+.es-rail-note svg {
+  color: var(--es-blue);
+}
+.es-career-list-wrap {
+  position: relative;
+  min-width: 0;
+}
+.es-career-spine {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 18px;
+  width: 1px;
+  background: #c5c9bb;
+  pointer-events: none;
+}
+.es-career-progress {
+  position: absolute;
+  inset: 0;
+  background: var(--es-blue);
+  transform-origin: top center;
+  width: 2px;
+  margin-left: -0.5px;
+}
+.es-career-list {
+  list-style: none;
+  padding: 0 0 0 33px;
+  margin: 0;
+}
+.es-experience-item {
+  position: relative;
+  padding: 0 0 46px;
+}
+.es-experience-item + .es-experience-item {
+  padding-top: 35px;
+  border-top: 1px solid #d6d9ce;
+}
+.es-experience-item:before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: -39px;
+  height: 13px;
+  width: 13px;
+  background: var(--es-paper);
+  border: 1.5px solid #9ea58f;
+  box-shadow: 0 0 0 7px var(--es-paper);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+.es-experience-item + .es-experience-item:before {
+  top: 44px;
+}
+.es-experience-item[data-active="true"]:before {
+  background: var(--es-blue);
+  border-color: var(--es-blue);
+}
+.es-role-dates {
+  font: 10px/1.6 var(--font-mono);
+  letter-spacing: 0.035em;
+  color: #7a806f;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+.es-current-label {
+  padding: 3px 5px;
+  font: 8px var(--font-mono);
+  background: var(--es-citron);
+  color: #48552b;
+  border: 1px solid #b6cb6c;
+  letter-spacing: 0.04em;
+}
+.es-role-company {
+  font-size: clamp(28px, 3.2vw, 49px);
+  line-height: 1.04;
+  letter-spacing: -0.055em;
+  font-weight: 550;
+  overflow-wrap: anywhere;
+}
+.es-role-title {
+  font-size: 17px;
+  letter-spacing: -0.015em;
+  line-height: 1.4;
+  font-weight: 500;
+  color: var(--es-blue);
+  margin: 9px 0 0;
+}
+.es-role-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 15px;
+  margin-top: 15px;
+  color: #737967;
+  font: 9px/1.7 var(--font-mono);
+}
+.es-role-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.es-role-summary {
+  font-size: 13px;
+  line-height: 1.85;
+  max-width: 510px;
+  color: #656c5b;
+  margin-top: 21px;
+}
+.es-role-notes {
+  margin-top: 15px;
+}
+.es-role-notes > summary {
+  font-size: 11px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  list-style: none;
+  cursor: pointer;
+  width: fit-content;
+  padding: 5px 0;
+  color: #586047;
+  border-bottom: 1px solid #aab29a;
+}
+.es-role-notes > summary::-webkit-details-marker {
+  display: none;
+}
+.es-role-notes > summary svg {
+  width: 13px;
+  height: 13px;
+  transition: transform 0.2s var(--es-ease-out);
+}
+.es-role-notes[open] > summary svg {
+  transform: rotate(45deg);
+}
+.es-role-notes-copy {
+  padding: 15px 0 0;
+}
+.es-role-notes-copy > p {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #737966;
+  white-space: pre-line;
+}
+.es-role-notes-copy ul {
+  padding-left: 17px;
+  margin: 15px 0 0;
+  display: grid;
+  gap: 8px;
+}
+.es-role-notes-copy li {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #69705e;
+}
+.es-role-notes-copy a {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  font: 9px var(--font-mono);
+  color: var(--es-blue);
+  margin-top: 15px;
+}
+.es-career-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 35px;
+  margin-top: 40px;
+  padding-top: 27px;
+  border-top: 1px solid #20211e40;
+}
+.es-career-footer p {
+  font: 9px/1.9 var(--font-mono);
+  color: #818873;
+  max-width: 500px;
+}
+.es-career-footer > a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  font-size: 12px;
+  white-space: nowrap;
+  border-bottom: 1px solid #798567;
+  padding-bottom: 7px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .es-discipline > summary:hover .es-discipline-title {
+    color: var(--es-citron);
+  }
+  .es-discipline:not([open]) > summary:hover .es-discipline-toggle {
+    transform: rotate(90deg);
+    background: #f6f5ef13;
+  }
+  .es-role-notes > summary:hover {
+    color: var(--es-blue);
+  }
+  .es-experience-top > a svg,
+  .es-career-footer > a svg {
+    transition: transform 0.2s var(--es-ease-out);
+  }
+  .es-experience-top > a:hover svg,
+  .es-career-footer > a:hover svg {
+    transform: translate(2px, -2px);
+  }
+}
+@media (min-width: 1550px) {
+  .es-skills-title {
+    font-size: 145px;
+  }
+  .es-skills-heading {
+    margin-bottom: 90px;
+  }
+  .es-career-grid {
+    gap: 105px;
+  }
+  .es-career-title {
+    font-size: 110px;
+  }
+}
+@media (max-width: 1100px) {
+  .es-shell {
+    width: calc(100% - 72px);
+  }
+  .es-skills {
+    padding-top: 85px;
+  }
+  .es-skills-heading {
+    gap: 40px;
+    grid-template-columns: 1.4fr 0.6fr;
+    margin-bottom: 60px;
+  }
+  .es-skills-title {
+    font-size: 91px;
+  }
+  .es-skills-intro > p {
+    font-size: 13px;
+  }
+  .es-discipline-content {
+    gap: 35px;
+    padding-left: 70px;
+    padding-right: 15px;
+  }
+  .es-discipline > summary {
+    grid-template-columns: 52px minmax(0, 1fr) 95px 30px;
+  }
+  .es-discipline-title {
+    font-size: 34px;
+  }
+  .es-career-grid {
+    gap: 50px;
+    grid-template-columns: 0.8fr 1.2fr;
+  }
+  .es-career-title {
+    font-size: 78px;
+  }
+  .es-role-company {
+    font-size: 38px;
+  }
+  .es-experience {
+    padding-top: 85px;
+  }
+  .es-year-window {
+    margin-top: 40px;
+  }
+  .es-year-number {
+    font-size: 118px;
+  }
+}
+@media (max-width: 850px) {
+  .es-shell {
+    width: calc(100% - 48px);
+  }
+  .es-skills-heading {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    margin-bottom: 45px;
+  }
+  .es-skills-title {
+    font-size: 110px;
+  }
+  .es-skills-intro {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+  .es-toolbox-stamp {
+    margin: 0 0 0 5px;
+    flex-shrink: 0;
+    width: 58px;
+    height: 58px;
+  }
+  .es-toolbox-stamp svg {
+    width: 29px;
+  }
+  .es-skills-intro > p {
+    max-width: 350px;
+  }
+  .es-skills-intro .es-open-cue {
+    margin-top: 0;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .es-discipline-content {
+    grid-template-columns: 1fr 1fr;
+    padding-left: 70px;
+    gap: 25px;
+  }
+  .es-discipline-description {
+    font-size: 13px;
+  }
+  .es-tools-list {
+    gap: 11px 16px;
+  }
+  .es-tools-list li {
+    font-size: 11px;
+  }
+  .es-discipline-title {
+    font-size: 30px;
+  }
+  .es-career-grid {
+    grid-template-columns: 1fr;
+    padding-top: 43px;
+    gap: 55px;
+  }
+  .es-career-rail {
+    display: grid;
+    grid-template-columns: 1fr 0.6fr;
+    gap: 0 35px;
+  }
+  .es-career-title {
+    font-size: 87px;
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  .es-career-intro {
+    grid-column: 2;
+    font-size: 12px;
+    margin-top: 5px;
+  }
+  .es-year-window {
+    display: none;
+  }
+  .es-chapter-counter {
+    display: none;
+  }
+  .es-rail-note {
+    grid-column: 2;
+    font-size: 8px;
+    margin-top: 20px;
+  }
+  .es-career-list-wrap {
+    margin-left: 12px;
+  }
+  .es-role-company {
+    font-size: 43px;
+  }
+  .es-role-summary {
+    max-width: none;
+  }
+  .es-experience-item {
+    padding-bottom: 35px;
+  }
+  .es-career-footer {
+    gap: 30px;
+  }
+  .es-role-title {
+    font-size: 19px;
+  }
+  .es-skills-bottom {
+    font-size: 8px;
+  }
+  .es-experience {
+    padding-bottom: 75px;
+  }
+}
+@media (max-width: 640px) {
+  .es-shell {
+    width: calc(100% - 40px);
+  }
+  .es-kicker {
+    font-size: 8px;
+    letter-spacing: 0.09em;
+    gap: 8px;
+  }
+  .es-skills {
+    padding-top: 62px;
+  }
+  .es-skills-heading {
+    margin-bottom: 35px;
+    gap: 25px;
+  }
+  .es-skills-heading .es-kicker {
+    margin-bottom: 21px;
+  }
+  .es-skills-title {
+    font-size: clamp(71px, 17.8vw, 104px);
+    letter-spacing: -0.03em;
+  }
+  .es-skills-intro {
+    gap: 23px;
+    align-items: flex-start;
+  }
+  .es-skills-intro > p {
+    font-size: 12px;
+    line-height: 1.7;
+    max-width: 250px;
+  }
+  .es-toolbox-stamp {
+    width: 51px;
+    height: 51px;
+    border-width: 3px;
+    margin-top: 4px;
+  }
+  .es-toolbox-stamp svg {
+    width: 25px;
+  }
+  .es-skills-intro .es-open-cue {
+    display: none;
+  }
+  .es-discipline > summary {
+    grid-template-columns: 24px minmax(0, 1fr) 25px;
+    gap: 11px;
+    padding: 23px 0;
+  }
+  .es-discipline-number {
+    font-size: 8px;
+    padding-top: 7px;
+  }
+  .es-discipline-title {
+    font-size: clamp(23px, 5.7vw, 31px);
+    letter-spacing: -0.045em;
+  }
+  .es-discipline-count {
+    display: none;
+  }
+  .es-discipline-toggle {
+    width: 25px;
+    height: 25px;
+  }
+  .es-discipline-toggle svg {
+    width: 14px;
+    height: 14px;
+  }
+  .es-discipline-content {
+    grid-template-columns: 1fr;
+    padding: 1px 9px 25px 35px;
+    gap: 25px;
+  }
+  .es-discipline-description {
+    font-size: 12px;
+    line-height: 1.75;
+    max-width: none;
+  }
+  .es-capability-skills {
+    gap: 8px 16px;
+    margin-top: 14px;
+  }
+  .es-capability-skills li {
+    font-size: 10px;
+  }
+  .es-tools-label {
+    font-size: 8px;
+    margin-bottom: 13px;
+  }
+  .es-tools-list {
+    gap: 8px 15px;
+  }
+  .es-tools-list li {
+    font-size: 11px;
+    padding-bottom: 6px;
+  }
+  .es-skills-bottom {
+    font-size: 7px;
+    padding: 21px 0 24px;
+    gap: 15px;
+    align-items: flex-start;
+  }
+  .es-skills-bottom > span:last-child {
+    gap: 7px;
+    max-width: 105px;
+    line-height: 1.7;
+  }
+  .es-skills-bottom > span:first-child {
+    max-width: 200px;
+    line-height: 1.9;
+  }
+  .es-type-strip {
+    padding-top: 18px;
+    padding-bottom: 12px;
+  }
+  .es-type-track {
+    font-size: 86px;
+    gap: 20px;
+  }
+  .es-experience {
+    padding: 58px 0 58px;
+  }
+  .es-experience-top {
+    padding-bottom: 24px;
+    align-items: center;
+  }
+  .es-experience-top > a {
+    font-size: 8px;
+    gap: 6px;
+  }
+  .es-experience-top > a svg {
+    width: 13px;
+  }
+  .es-career-grid {
+    padding-top: 32px;
+    gap: 34px;
+  }
+  .es-career-rail {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .es-career-title {
+    font-size: clamp(56px, 15vw, 74px);
+    max-width: none;
+    grid-row: auto;
+  }
+  .es-career-title br:last-of-type {
+    display: none;
+  }
+  .es-career-title span {
+    display: block;
+  }
+  .es-career-intro {
+    grid-column: 1;
+    font-size: 13px;
+    max-width: 320px;
+    margin: 0;
+  }
+  .es-rail-note {
+    display: none;
+  }
+  .es-career-list-wrap {
+    margin-left: 4px;
+  }
+  .es-career-list {
+    padding-left: 24px;
+  }
+  .es-experience-item:before {
+    left: -29px;
+    width: 11px;
+    height: 11px;
+    box-shadow: 0 0 0 5px var(--es-paper);
+    top: 8px;
+  }
+  .es-experience-item + .es-experience-item:before {
+    top: 37px;
+  }
+  .es-experience-item + .es-experience-item {
+    padding-top: 29px;
+  }
+  .es-experience-item {
+    padding-bottom: 29px;
+  }
+  .es-role-dates {
+    font-size: 8px;
+    gap: 8px;
+    margin-bottom: 13px;
+  }
+  .es-current-label {
+    font-size: 6px;
+  }
+  .es-role-company {
+    font-size: clamp(30px, 8.5vw, 44px);
+    letter-spacing: -0.045em;
+  }
+  .es-role-title {
+    font-size: 16px;
+    margin-top: 8px;
+  }
+  .es-role-meta {
+    font-size: 8px;
+    margin-top: 11px;
+    gap: 5px 10px;
+  }
+  .es-role-summary {
+    font-size: 12px;
+    line-height: 1.75;
+    margin-top: 17px;
+  }
+  .es-role-notes > summary {
+    font-size: 10px;
+  }
+  .es-role-notes-copy > p,
+  .es-role-notes-copy li {
+    font-size: 11px;
+    line-height: 1.8;
+  }
+  .es-career-footer {
+    margin-top: 17px;
+    flex-direction: column;
+    gap: 23px;
+  }
+  .es-career-footer p {
+    font-size: 8px;
+    line-height: 1.85;
+  }
+  .es-career-footer > a {
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .es-root * {
+    transition: none !important;
+  }
+  .es-root .es-type-track {
+    transform: translateX(-45px);
+  }
+  .es-root .es-career-progress {
+    transform: scaleY(1) !important;
+  }
+  .es-root .es-heading-line > span {
+    transform: none !important;
+  }
+  .es-root .es-role-copy {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+.es-role-compact .es-role-company {
+  font-size: 30px;
+  letter-spacing: -0.04em;
+}
+.es-role-compact .es-role-title {
+  font-size: 15px;
+}
+.es-role-compact .es-role-meta {
+  margin-top: 11px;
+}
+.es-role-compact .es-role-notes {
+  margin-top: 12px;
+}
+.es-role-compact .es-role-dates {
+  margin-bottom: 12px;
+}

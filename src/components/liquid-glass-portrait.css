@@ -1,0 +1,114 @@
+.lgp-portrait {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  isolation: isolate;
+}
+.lgp-portrait,
+.lgp-portrait * {
+  pointer-events: none !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.lgp-lens {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  opacity: 0;
+  isolation: isolate;
+  box-shadow:
+    0 16px 32px -16px #152a4552,
+    0 3px 12px #152a4524;
+}
+.lgp-portrait[data-ready="true"] .lgp-lens {
+  opacity: 1;
+}
+.lgp-lens-view {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 50%;
+  clip-path: circle(50% at 50% 50%);
+  background: var(--paper, #f6f5ef);
+}
+.lgp-mirror-plane {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  contain: layout style;
+}
+.lgp-optical-rim,
+.lgp-reflection {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+.lgp-optical-rim {
+  box-shadow:
+    inset 3px 4px 10px #e4f4ff47,
+    inset -4px -6px 12px #203a6033;
+}
+.lgp-reflection {
+  background: conic-gradient(
+    from -35deg,
+    #bce6ff47,
+    #7e9aff0f 18%,
+    #2a45792e 38%,
+    #c4efff4d 56%,
+    #a7bfff1a 74%,
+    #bce6ff47
+  );
+  /* Feather only the perimeter; the photo stays completely clear inside. */
+  mask-image: radial-gradient(circle closest-side, transparent 92%, #000 100%);
+  -webkit-mask-image: radial-gradient(
+    circle closest-side,
+    transparent 92%,
+    #000 100%
+  );
+}
+.lgp-portrait .lgp-lens-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  clip-path: circle(50% at 50% 50%);
+  background: transparent;
+  pointer-events: auto !important;
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.lgp-portrait .lgp-lens-handle:active {
+  cursor: grabbing;
+}
+.lgp-portrait:not([data-ready="true"]) .lgp-lens-handle {
+  visibility: hidden;
+}
+.lgp-portrait:not([data-input="pointer"]):not([data-dragging="true"]):has(
+    .lgp-lens-handle:focus-visible
+  )
+  .lgp-lens,
+.lgp-portrait[data-input="keyboard"]:not([data-dragging="true"]):has(
+    .lgp-lens-handle:focus
+  )
+  .lgp-lens {
+  outline: 3px solid var(--blue, #2453ff);
+  outline-offset: 5px;
+}
+.lgp-lens-handle:focus-visible {
+  outline: none;
+}
+@media (forced-colors: active) {
+  .lgp-optical-rim {
+    border: 1px solid CanvasText;
+  }
+}

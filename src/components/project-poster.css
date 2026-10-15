@@ -1,0 +1,548 @@
+@font-face {
+  font-family: "Poster Baloo";
+  src: url("/fonts/project-baloo-2-800.woff2") format("woff2");
+  font-weight: 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Poster Bricolage";
+  src: url("/fonts/project-bricolage-grotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+.project-poster {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.24;
+  container-type: inline-size;
+  isolation: isolate;
+  overflow: hidden;
+  color: #173c35;
+  text-decoration: none;
+  box-shadow: 0 25px 50px -30px #12261955;
+  border-radius: 3px;
+}
+.pp-composition {
+  position: absolute;
+  inset: 0;
+}
+.pp-composition > div {
+  position: absolute;
+}
+.pp-composition img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: none;
+}
+.pp-composition em {
+  font-style: normal;
+}
+.pp-open {
+  position: absolute;
+  bottom: 3.5%;
+  right: 3.5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 40px;
+  height: 40px;
+  background: #fffdf8;
+  color: #173c35;
+  border-radius: 50%;
+  z-index: 5;
+  box-shadow: 0 3px 15px #142d3020;
+  transition:
+    transform 250ms ease,
+    background-color 250ms ease;
+}
+.pp-open > span {
+  position: absolute;
+  right: 49px;
+  white-space: nowrap;
+  background: #fffdf8;
+  color: #173c35;
+  font-size: 11px;
+  padding: 9px 12px;
+  border-radius: 20px;
+  opacity: 0;
+  transform: translateX(8px);
+  transition:
+    opacity 200ms,
+    transform 200ms;
+}
+.project-poster:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 5px;
+}
+.project-poster:focus-visible .pp-open > span {
+  opacity: 1;
+  transform: none;
+}
+
+/* Courtfolio: a piece of sports campaign artwork, with the real player journal. */
+.pp-courtfolio {
+  background: #f0efe5;
+  color: #182119;
+}
+.pp-court-lines {
+  inset: -14% 5% -12% 27%;
+  border: 2px solid #7c967d25;
+  border-radius: 10%;
+  transform: rotate(24deg);
+  background:
+    linear-gradient(90deg, transparent 49.8%, #7c967d25 50%, transparent 50.3%),
+    linear-gradient(
+      0deg,
+      transparent 33%,
+      #7c967d25 33.2%,
+      transparent 33.5%,
+      transparent 66%,
+      #7c967d25 66.2%,
+      transparent 66.5%
+    );
+}
+.pp-court-brand {
+  width: 30%;
+  left: 6%;
+  top: 5%;
+}
+.pp-court-type {
+  left: 6%;
+  top: 15%;
+  font:
+    800 11.3cqw/0.98 "Poster Baloo",
+    sans-serif;
+  letter-spacing: -0.5cqw;
+  z-index: 1;
+}
+.pp-court-type em {
+  color: #76b426;
+}
+.pp-court-sculpture {
+  width: 51%;
+  right: -1%;
+  top: 11%;
+  z-index: 2;
+}
+.pp-court-screen {
+  width: 18.5%;
+  left: 13%;
+  top: 43%;
+  z-index: 3;
+}
+.pp-court-screen img {
+  border-radius: 1.7cqw;
+  transform: rotate(-9deg);
+  box-shadow: 0 16px 22px #203a2333;
+}
+
+/* Marky's large mascot and warm voice lead; the inbox remains genuine product UI. */
+.pp-hellomarky {
+  background: #102f2a;
+  color: #fffdf8;
+}
+.pp-hello-orbit {
+  width: 82%;
+  aspect-ratio: 1;
+  border: 1px solid #9fddc428;
+  border-radius: 50%;
+  right: -28%;
+  top: -38%;
+  box-shadow:
+    0 0 0 45px #9fddc408,
+    0 0 0 90px #9fddc405;
+}
+.pp-hello-brand {
+  top: 5%;
+  left: 6%;
+  width: 37%;
+}
+.pp-hello-type {
+  top: 16%;
+  left: 6%;
+  font: 600 10.8cqw/0.92 var(--font-body);
+  letter-spacing: -0.5cqw;
+  z-index: 2;
+}
+.pp-hello-type em {
+  color: #9fddc4;
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.2em;
+}
+.pp-hello-mascot {
+  width: 33%;
+  right: 8%;
+  top: 12%;
+  transform: rotate(9deg);
+}
+.pp-hello-screen {
+  width: 68%;
+  left: 10%;
+  top: 42%;
+  z-index: 2;
+}
+.pp-hello-screen img {
+  border-radius: 1cqw;
+  transform: rotate(-5deg);
+  box-shadow: 0 20px 36px #001c2a66;
+}
+.pp-hello-sticker {
+  width: 29%;
+  right: 3%;
+  bottom: 14%;
+  z-index: 3;
+}
+.pp-hello-sticker img {
+  transform: rotate(10deg);
+}
+
+/* PicklePals: a club notice with its original illustrated crew. */
+.pp-pickle-pals {
+  background: #fcf8ec;
+  color: #084a2c;
+}
+.pp-pickle-band {
+  inset: 68% 0 0;
+  background: #f3b854;
+  border-top: 2px solid #084a2c;
+}
+.pp-pickle-brand {
+  width: 28%;
+  left: 6%;
+  top: 5%;
+}
+.pp-pickle-type {
+  left: 6%;
+  top: 18%;
+  font:
+    800 12cqw/0.94 "Poster Baloo",
+    sans-serif;
+  letter-spacing: -0.5cqw;
+}
+.pp-pickle-type em {
+  color: #e37752;
+}
+.pp-pickle-stamp {
+  top: 7%;
+  right: 7%;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  width: 18%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font: 600 1.45cqw/1.4 var(--font-mono);
+  transform: rotate(12deg);
+}
+.pp-pickle-screen {
+  width: 24%;
+  right: 11%;
+  top: 32%;
+  z-index: 2;
+}
+.pp-pickle-screen img {
+  border-radius: 1.3cqw;
+  transform: rotate(8deg);
+  box-shadow: 0 12px 23px #6a4d2730;
+}
+.pp-pickle-crew {
+  width: 50%;
+  left: 2%;
+  bottom: 9%;
+  z-index: 3;
+}
+.pp-pickle-crew img {
+  transform: rotate(-4deg);
+}
+.pp-pickle-footer {
+  left: 6%;
+  bottom: 5%;
+  font: 600 1.15cqw var(--font-mono);
+  letter-spacing: 0.03cqw;
+}
+
+/* SelfHelp: blue technical print with two complete, layered product screens. */
+.pp-selfhelp-ai {
+  background: #2563eb;
+  color: #fff;
+}
+.pp-self-grid {
+  inset: 0;
+  background-image:
+    linear-gradient(#ffffff0a 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff0a 1px, transparent 1px);
+  background-size: 8% 10%;
+}
+.pp-self-brand {
+  left: 6%;
+  top: 5%;
+  display: flex;
+  align-items: center;
+  gap: 1.2cqw;
+  font-size: 2.5cqw;
+  font-weight: 650;
+}
+.pp-self-brand img {
+  width: 4.2cqw;
+  background: #fff;
+  border-radius: 0.8cqw;
+  padding: 0.45cqw;
+}
+.pp-self-type {
+  left: 6%;
+  top: 15%;
+  font: 600 10cqw/0.98 var(--font-body);
+  letter-spacing: -0.55cqw;
+  z-index: 2;
+}
+.pp-self-type em {
+  color: #bdd7ff;
+}
+.pp-self-ring {
+  width: 52%;
+  aspect-ratio: 1;
+  right: -19%;
+  top: 6%;
+  border-radius: 50%;
+  border: 1.7cqw solid #b5d2ff;
+  box-shadow:
+    inset 0 0 0 1.7cqw #2563eb,
+    inset 0 0 0 1.85cqw #b5d2ff;
+}
+.pp-self-screen {
+  width: 70%;
+  left: 6%;
+  top: 42%;
+  z-index: 2;
+}
+.pp-self-screen img {
+  border-radius: 0.6cqw;
+  box-shadow: 0 15px 30px #00277744;
+}
+.pp-self-knowledge {
+  width: 48%;
+  right: 5%;
+  bottom: 10%;
+  z-index: 3;
+}
+.pp-self-knowledge img {
+  border-radius: 0.6cqw;
+  box-shadow: 0 15px 25px #00277744;
+}
+
+/* Parking Buddy: a road, the actual car artwork, and a real driver's pass. */
+.pp-parking-buddy {
+  background: #f8f4e8;
+  color: #183f34;
+}
+.pp-parking-brand {
+  top: 5%;
+  left: 6%;
+  display: flex;
+  align-items: center;
+  gap: 1cqw;
+  font:
+    800 3.3cqw "Poster Bricolage",
+    sans-serif;
+  letter-spacing: -0.15cqw;
+}
+.pp-parking-brand img {
+  width: 4cqw;
+}
+.pp-parking-type {
+  left: 6%;
+  top: 17%;
+  font:
+    800 10.5cqw/0.93 "Poster Bricolage",
+    sans-serif;
+  letter-spacing: -0.5cqw;
+  z-index: 2;
+}
+.pp-parking-type em {
+  color: #39715b;
+}
+.pp-parking-road {
+  width: 89%;
+  height: 61%;
+  left: 26%;
+  top: 39%;
+  background: #255e4e;
+  border-radius: 50% 0 0 50%;
+  transform: rotate(-8deg);
+}
+.pp-parking-road span {
+  position: absolute;
+  inset: 10% 7%;
+  border: 2px dashed #e8edd7b3;
+  border-radius: inherit;
+}
+.pp-parking-car {
+  width: 24%;
+  right: 16%;
+  top: 34%;
+  z-index: 2;
+}
+.pp-parking-car img {
+  transform: rotate(22deg);
+  filter: drop-shadow(4px 15px 5px #0b2d3050);
+}
+.pp-parking-pass {
+  width: 14%;
+  left: 10%;
+  top: 44%;
+  z-index: 3;
+}
+.pp-parking-pass img {
+  transform: rotate(-8deg);
+  box-shadow: 0 12px 25px #123e3430;
+  border-radius: 0.6cqw;
+}
+.pp-parking-ticket {
+  right: 10%;
+  bottom: 12%;
+  z-index: 3;
+  background: #beebc8;
+  padding: 3cqw 3.7cqw;
+  transform: rotate(8deg);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 95%,
+    96% 100%,
+    92% 95%,
+    88% 100%,
+    84% 95%,
+    80% 100%,
+    76% 95%,
+    72% 100%,
+    68% 95%,
+    64% 100%,
+    60% 95%,
+    56% 100%,
+    52% 95%,
+    48% 100%,
+    44% 95%,
+    40% 100%,
+    36% 95%,
+    32% 100%,
+    28% 95%,
+    24% 100%,
+    20% 95%,
+    16% 100%,
+    12% 95%,
+    8% 100%,
+    4% 95%,
+    0 100%
+  );
+}
+.pp-parking-ticket b {
+  display: block;
+  font:
+    800 5cqw/0.93 "Poster Bricolage",
+    sans-serif;
+  letter-spacing: -0.15cqw;
+}
+.pp-parking-ticket span {
+  display: block;
+  font: 500 0.95cqw var(--font-mono);
+  margin-top: 1.5cqw;
+  border-top: 1px solid #183f3455;
+  padding-top: 1cqw;
+}
+
+/* Next Move: an editorial education/travel cover with the original compass. */
+.pp-next-move-asia {
+  background: #fdf2dc;
+  color: #163ca4;
+}
+.pp-next-brand {
+  width: 39%;
+  left: 6%;
+  top: 5%;
+}
+.pp-next-type {
+  top: 16%;
+  left: 6%;
+  font: 650 9.2cqw/0.98 var(--font-body);
+  letter-spacing: -0.55cqw;
+  z-index: 2;
+}
+.pp-next-type em {
+  color: #dc7340;
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 0.95em;
+  letter-spacing: -0.4cqw;
+}
+.pp-next-compass {
+  width: 39%;
+  right: -1%;
+  top: 30%;
+  z-index: 3;
+}
+.pp-next-route {
+  width: 67%;
+  height: 63%;
+  right: -9%;
+  top: 12%;
+  border: 1px dashed #163ca450;
+  border-radius: 50%;
+  transform: rotate(-30deg);
+}
+.pp-next-screen {
+  left: 6%;
+  top: 40%;
+  width: 62%;
+  z-index: 2;
+}
+.pp-next-screen img {
+  box-shadow: 0 14px 26px #4b3a562b;
+  transform: rotate(-6deg);
+  border: 0.5cqw solid #fffdf7;
+}
+.pp-next-asterisk {
+  left: 7%;
+  bottom: 10%;
+  font: 400 10cqw/1 var(--font-body);
+  color: #dc7340;
+}
+.pp-next-footer {
+  left: 6%;
+  bottom: 5%;
+  font: 500 1.1cqw var(--font-mono);
+  letter-spacing: 0.04cqw;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .project-poster:hover .pp-open {
+    transform: rotate(5deg);
+    background: #fff;
+  }
+  .project-poster:hover .pp-open > span {
+    opacity: 1;
+    transform: translateX(0) rotate(-5deg);
+  }
+}
+@media (max-width: 680px) {
+  .pp-open {
+    width: 32px;
+    height: 32px;
+  }
+  .pp-open svg {
+    width: 18px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pp-open,
+  .pp-open > span {
+    transition: none;
+  }
+}

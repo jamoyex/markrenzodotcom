@@ -1,0 +1,432 @@
+.lc-wrap {
+  min-width: 0;
+  width: 100%;
+}
+.lc-board {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.15;
+  isolation: isolate;
+}
+.lc-piece {
+  position: absolute;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  color: var(--ink, #20211e);
+}
+.lc-piece[data-dragging="true"] {
+  cursor: grabbing;
+}
+.lc-piece:focus-visible {
+  outline: 3px solid #294fff;
+  outline-offset: 5px;
+}
+.lc-face {
+  display: block;
+  position: relative;
+  rotate: var(--lc-angle);
+}
+.lc-photo {
+  width: 36%;
+}
+.lc-photo .lc-face {
+  padding: 9px 9px 27px;
+  background: white;
+  border: 1px solid #20211e12;
+  box-shadow:
+    0 12px 26px #20211e13,
+    0 2px 4px #20211e08;
+}
+.lc-photo img,
+.lc-photo video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  pointer-events: none;
+}
+.lc-caption {
+  position: absolute;
+  bottom: 8px;
+  left: 9px;
+  right: 4px;
+  text-align: left;
+  font: 9px/1.2 var(--font-mono);
+  letter-spacing: -0.3px;
+}
+.lc-photo-1 {
+  left: 5%;
+  top: 3%;
+  --lc-angle: -9deg;
+}
+.lc-photo-2 {
+  left: 53%;
+  top: 5%;
+  --lc-angle: 8deg;
+}
+.lc-photo-3 {
+  left: 3%;
+  top: 57%;
+  --lc-angle: -6deg;
+  width: 30%;
+}
+.lc-photo-4 {
+  left: 36%;
+  top: 54%;
+  --lc-angle: 5deg;
+  width: 30%;
+}
+.lc-photo-5 {
+  left: 67%;
+  top: 59%;
+  --lc-angle: -7deg;
+  width: 30%;
+}
+.lc-human .lc-face,
+.lc-detour .lc-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 5px solid white;
+  border-radius: 14px;
+  box-shadow: 0 4px 5px #20211e1c;
+  font: 25px/0.95 var(--font-pixel);
+  padding: 12px;
+}
+.lc-human {
+  color: white;
+  left: 9%;
+  top: 43%;
+  --lc-angle: -10deg;
+}
+.lc-human .lc-face {
+  background: #294fff;
+}
+.lc-detour .lc-face {
+  background: #dff18c;
+}
+.lc-human svg {
+  width: 35px;
+  height: 35px;
+}
+.lc-detour {
+  right: 4%;
+  top: 43%;
+  --lc-angle: 8deg;
+  color: #20211e;
+}
+.lc-detour svg {
+  width: 28px;
+  height: 28px;
+}
+.lc-note {
+  left: 39%;
+  top: 48%;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #294fff;
+  font: 11px/1.4 var(--font-mono);
+  --lc-angle: -5deg;
+  text-align: left;
+}
+.lc-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 15px;
+  color: #74776d;
+  font: 10px/1.5 var(--font-mono);
+}
+.lc-controls button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 0;
+  padding: 8px 0;
+  background: none;
+  color: #20211e;
+  cursor: pointer;
+  white-space: nowrap;
+  font: inherit;
+}
+.lc-controls button:focus-visible {
+  outline: 2px solid #294fff;
+  outline-offset: 3px;
+}
+@media (max-width: 1100px) {
+  .lc-wrap {
+    max-width: 640px;
+    margin-inline: auto;
+  }
+}
+@media (max-width: 600px) {
+  .lc-board {
+    aspect-ratio: 1 / 1.28;
+  }
+  .lc-photo .lc-face {
+    padding: 6px 6px 27px;
+  }
+  .lc-caption {
+    font-size: 8px;
+    left: 6px;
+    bottom: 6px;
+    max-width: calc(100% - 12px);
+  }
+  .lc-human .lc-face,
+  .lc-detour .lc-face {
+    font-size: 16px;
+    border-width: 4px;
+    padding: 8px;
+    gap: 5px;
+    border-radius: 11px;
+  }
+  .lc-human svg {
+    width: 25px;
+    height: 25px;
+  }
+  .lc-detour svg {
+    width: 20px;
+    height: 20px;
+  }
+  .lc-note {
+    font-size: 8px;
+    top: 48%;
+    left: 40%;
+  }
+  .lc-human,
+  .lc-detour {
+    top: 43%;
+  }
+  .lc-controls {
+    align-items: flex-start;
+    font-size: 9px;
+    margin-top: 0;
+  }
+  .lc-controls > span {
+    max-width: 160px;
+  }
+  .lc-controls button {
+    padding-top: 0;
+  }
+}
+
+/* One shared playfield: photos can cross the entire section underneath its copy. */
+.portfolio-v2 .about-section.about-playfield {
+  position: relative;
+  display: block;
+  isolation: isolate;
+  min-height: 990px;
+  padding-block: 270px 180px;
+  overflow: clip;
+}
+.about-playfield .lc-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  max-width: none;
+  pointer-events: none;
+}
+.about-playfield .lc-board {
+  position: absolute;
+  inset: 18px 18px 88px;
+  width: auto;
+  aspect-ratio: auto;
+}
+.about-playfield .lc-piece {
+  pointer-events: auto;
+}
+.about-playfield .lc-photo {
+  width: clamp(155px, 17.5vw, 265px);
+}
+.about-playfield .lc-photo-1 {
+  left: 5%;
+  top: 7%;
+}
+.about-playfield .lc-photo-2 {
+  left: 31%;
+  top: 3%;
+  width: clamp(150px, 16vw, 240px);
+}
+.about-playfield .lc-photo-3 {
+  left: 13%;
+  top: 57%;
+  width: clamp(145px, 15vw, 225px);
+}
+.about-playfield .lc-photo-4 {
+  left: 55%;
+  top: 66%;
+  width: clamp(145px, 14vw, 210px);
+}
+.about-playfield .lc-photo-5 {
+  left: 81%;
+  top: 8%;
+  width: clamp(145px, 14vw, 210px);
+}
+.about-playfield .lc-human {
+  left: 4%;
+  top: 48%;
+}
+.about-playfield .lc-detour {
+  right: 6%;
+  top: 74%;
+}
+.about-playfield .lc-note {
+  left: 35%;
+  top: 48%;
+  font-size: 13px;
+}
+.portfolio-v2 .about-playfield .about-copy {
+  position: relative;
+  z-index: 2;
+  width: 48%;
+  margin-left: 46%;
+  isolation: isolate;
+  pointer-events: none;
+}
+.about-playfield .about-copy::before {
+  content: "";
+  position: absolute;
+  inset: -62px -45px;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse at center,
+    #f6f5effa 35%,
+    #f6f5efe8 55%,
+    #f6f5ef00 73%
+  );
+  pointer-events: none;
+}
+.about-playfield .about-copy a {
+  pointer-events: auto;
+}
+.about-playfield .lc-controls {
+  position: absolute;
+  bottom: 28px;
+  left: 4%;
+  right: 4%;
+  z-index: 3;
+  pointer-events: auto;
+  color: #676a60;
+  margin: 0;
+}
+.lc-control-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+@media (max-width: 1100px) and (min-width: 701px) {
+  .portfolio-v2 .about-section.about-playfield {
+    min-height: 1050px;
+    padding-top: 290px;
+  }
+  .portfolio-v2 .about-playfield .about-copy {
+    width: 53%;
+    margin-left: 42%;
+  }
+  .about-playfield .lc-photo-5 {
+    left: 78%;
+  }
+}
+@media (max-width: 700px) {
+  .portfolio-v2 .about-section.about-playfield {
+    min-height: 1250px;
+    padding: 365px 24px 410px;
+  }
+  .about-playfield .lc-board {
+    inset: 18px 8px 94px;
+  }
+  .portfolio-v2 .about-playfield .about-copy {
+    margin: 0;
+    width: 100%;
+  }
+  .portfolio-v2 .about-playfield .about-copy h2 {
+    font-size: clamp(40px, 7vw, 54px);
+  }
+  .about-playfield .about-copy::before {
+    inset: -65px -45px;
+    background: radial-gradient(
+      ellipse,
+      #f6f5effc 40%,
+      #f6f5efed 58%,
+      #f6f5ef00 76%
+    );
+  }
+  .about-playfield .lc-photo {
+    width: 37%;
+  }
+  .about-playfield .lc-photo-1 {
+    left: 5%;
+    top: 3%;
+  }
+  .about-playfield .lc-photo-2 {
+    left: 55%;
+    top: 6%;
+    width: 37%;
+  }
+  .about-playfield .lc-photo-3 {
+    left: 5%;
+    top: 75%;
+    width: 31%;
+  }
+  .about-playfield .lc-photo-4 {
+    left: 35%;
+    top: 80%;
+    width: 31%;
+  }
+  .about-playfield .lc-photo-5 {
+    left: 65%;
+    top: 74%;
+    width: 31%;
+  }
+  .about-playfield .lc-human {
+    left: 8%;
+    top: 25%;
+  }
+  .about-playfield .lc-detour {
+    right: 7%;
+    top: 68%;
+  }
+  .about-playfield .lc-note {
+    left: 51%;
+    top: 27%;
+    font-size: 11px;
+  }
+  .about-playfield .lc-controls {
+    left: 24px;
+    right: 24px;
+    bottom: 26px;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .about-playfield .lc-controls > span {
+    max-width: none;
+  }
+  .lc-control-actions {
+    gap: 26px;
+  }
+}
+
+.lc-video-badge {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  background: #20211ed9;
+  color: white;
+  padding: 5px 8px;
+  border-radius: 20px;
+  font: 10px/1.4 var(--font-mono);
+}
